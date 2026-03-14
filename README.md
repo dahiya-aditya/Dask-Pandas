@@ -1,9 +1,12 @@
 # Dask-Pandas
 
 ## Team Members
-Aditya Dahiya (dahiya-aditya)  \n
-Adwita Joglekar (adwita314)    \n
-Saachi Sirola (saachisirola)   \n
+Aditya Dahiya (dahiya-aditya)  
+
+Adwita Joglekar (adwita314)  
+
+Saachi Sirola (saachisirola)  
+
 Brajesh ()                       
 
 ## Objective

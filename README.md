@@ -2,11 +2,8 @@
 
 ## Team Members
 Aditya Dahiya (dahiya-aditya)  
-
 Adwita Joglekar (adwita314)  
-
 Saachi Sirola (saachisirola)  
-
 Brajesh ()                       
 
 ## Objective

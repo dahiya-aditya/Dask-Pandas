@@ -1,10 +1,10 @@
 # Dask-Pandas
 
 ## Team Members
-Aditya Dahiya (dahiya-aditya) 
-Adwita Joglekar (adwita314)
-Saachi Sirola (saachisirola)
-Brajesh ()
+Aditya Dahiya (dahiya-aditya)  \n
+Adwita Joglekar (adwita314)    \n
+Saachi Sirola (saachisirola)   \n
+Brajesh ()                       
 
 ## Objective
 To investigate how Dask enables scalable data processing for high-resolution weather datasets (ERA5) when in-memory Pandas workflows become impractical.

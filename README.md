@@ -22,4 +22,12 @@ Data source: https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-l
 5. Examine consistancy of results between Dask and Pandas. 
 
 ## Tasks completed
-1. Downloaded a small chunk of the dataset (464.2 MB) to analyse with Pandas. 
+1. Downloaded and analyzed a small chunk of the dataset (464.2 MB) with Pandas. 
+
+## Workspace layout
+- `docs/`: assignment PDFs and background material.
+- `data/raw/`: local ERA5 payloads and extracted NetCDF files used for analysis.
+- `data/results/`: CSV and JSON analysis outputs that summarize the Pandas runs.
+- `data/figures/`: generated PNG plots for the Q1 subset and Central India subset analyses.
+
+Raw ERA5 downloads and extracted NetCDF files are intentionally ignored by Git because they are large local artifacts. The derived tables, summaries, figures, and code remain in the repository.

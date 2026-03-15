@@ -1,0 +1,27 @@
+{
+  "analysis": "Central India seasonal heating and rainfall from the 464 MB archive",
+  "source_archive": "data\\raw\\era5_consistent_slice_download.nc",
+  "subset_region": {
+    "region_name": "Central India",
+    "north": 30,
+    "south": 20,
+    "west": 75,
+    "east": 85
+  },
+  "rows": 4800936,
+  "memory_mb": 572.3162956237793,
+  "time_steps": 2856,
+  "grid_shape": {
+    "latitude": 41,
+    "longitude": 41
+  },
+  "mean_t2m_c": 23.662546157836914,
+  "mean_sp_hpa": 945.13720703125,
+  "mean_daily_tp_mm": 0.8481837511062622,
+  "temp_pressure_correlation": -0.8327096686229394,
+  "figure_paths": {
+    "monthly_cycle": "data\\figures\\monthly_cycle.png",
+    "monsoon_comparison": "data\\figures\\monsoon_comparison.png",
+    "first_year_timeseries": "data\\figures\\first_year_timeseries.png"
+  }
+}

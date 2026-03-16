@@ -4,7 +4,7 @@
 Aditya Dahiya (dahiya-aditya)  
 Adwita Joglekar (adwita314)  
 Saachi Sirola (saachisirola)  
-Brajesh (Brajesh-k-Mahto)                       
+Brajesh K. Mahto (Brajesh-k-Mahto)                       
 
 ## Objective
 To investigate how Dask enables scalable data processing for high-resolution weather datasets (ERA5) when in-memory Pandas workflows become impractical.

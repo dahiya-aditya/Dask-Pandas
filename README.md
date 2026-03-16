@@ -32,14 +32,19 @@ Current request profiles used in this repository:
 6. Dask implementation and direct Pandas vs Dask consistency benchmarking remain in progress.
 
 ## Repository structure
-- core/config.py: centralized dataset paths, regions, thresholds, and plotting settings.
-- core/housekeeping.py: setup utility to verify data layout and create output directories.
-- core/utils.py: shared helpers for output management and figure saving.
-- central_india_464mb_analysis.py: Central India (464 MB) Pandas analysis.
-- south_asia_2024_large_analysis.py: South Asia 2024 large-scale Pandas analysis.
-- south_asia_naive_load_demo.py: minimal NetCDF loading demo.
-- api_requests/request_era5_consistent_slice_464mb.py: CDS API request script for the compact consistent-slice dataset.
-- api_requests/request_era5_full_2024_12gb.py: CDS API request script for the full 2024 high-volume dataset.
+```text
+Dask-Pandas/
+|-- core/
+|   |-- config.py                              # dataset paths, regions, thresholds, plotting settings
+|   |-- housekeeping.py                        # data layout checks and output directory setup
+|   `-- utils.py                               # shared output and figure helpers
+|-- api_requests/
+|   |-- request_era5_consistent_slice_464mb.py # compact consistent-slice request
+|   `-- request_era5_full_2024_12gb.py         # full 2024 high-volume request
+|-- central_india_464mb_analysis.py            # Central India (464 MB) Pandas analysis
+|-- south_asia_2024_large_analysis.py          # South Asia 2024 large-scale Pandas analysis
+`-- south_asia_naive_load_demo.py              # minimal NetCDF loading demo
+```
 
 ## Setup instructions
 Run these commands in any command-line interface from the project root.
@@ -72,15 +77,19 @@ Run these request scripts from the project root in the same command-line interfa
   - python api_requests/request_era5_full_2024_12gb.py
 
 ## Workspace layout
-- docs/: assignment PDFs and background material.
-- data/raw/: local ERA5 payloads and extracted NetCDF files used for analysis.
-- data/results/: CSV and JSON analysis outputs that summarize the Pandas runs.
-- data/figures/: generated PDF plots for the Central India and South Asia analyses.
+```text
+Dask-Pandas/
+|-- docs/         # assignment PDFs and background material
+`-- data/
+  |-- raw/      # local ERA5 payloads and extracted NetCDF files
+  |-- results/  # CSV and JSON analysis outputs
+  `-- figures/  # generated PDF plots for Central India and South Asia analyses
+```
 
 Raw ERA5 downloads and extracted NetCDF files are intentionally ignored by Git through .gitignore because they are large local datasets. The derived tables, summaries, figures, and code remain in the repository. The raw data can be downloaded using the API request scripts.
 
 ## Team Members
-Aditya Dahiya (dahiya-aditya)
-Adwita Joglekar (adwita314)
-Saachi Sirola (saachisirola)
-Brajesh K. Mahto (Brajesh-k-Mahto)
+- Aditya Dahiya (dahiya-aditya)
+- Adwita Joglekar (adwita314)
+- Saachi Sirola (saachisirola)
+- Brajesh K. Mahto (Brajesh-k-Mahto)

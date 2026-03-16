@@ -1,27 +1,37 @@
 {
-  "analysis": "Central India seasonal heating and rainfall from the 464 MB archive",
-  "source_archive": "data\\raw\\era5_consistent_slice_download.nc",
-  "subset_region": {
-    "region_name": "Central India",
+  "dataset": "ERA5 Consistent Slice (464 MB)",
+  "region": {
+    "name": "Central India",
     "north": 30,
     "south": 20,
     "west": 75,
     "east": 85
   },
-  "rows": 4800936,
-  "memory_mb": 572.3162956237793,
+  "rows_processed": 4800936,
+  "memory_mb": 256.3977699279785,
   "time_steps": 2856,
   "grid_shape": {
     "latitude": 41,
     "longitude": 41
   },
-  "mean_t2m_c": 23.662546157836914,
-  "mean_sp_hpa": 945.13720703125,
-  "mean_daily_tp_mm": 0.8481837511062622,
-  "temp_pressure_correlation": -0.8327096686229394,
+  "temperature_summary": {
+    "mean_t2m_c": 23.662546157836914,
+    "max_t2m_c": 34.7397346496582,
+    "min_t2m_c": 11.271937370300293
+  },
+  "pressure_summary": {
+    "mean_sp_hpa": 945.13720703125
+  },
+  "precipitation_summary": {
+    "mean_daily_tp_mm": 0.8481837511062622,
+    "total_tp_mm": 403.7354736328125
+  },
+  "correlations": {
+    "temp_pressure": -0.8327096686229394
+  },
   "figure_paths": {
-    "monthly_cycle": "data\\figures\\monthly_cycle.png",
-    "monsoon_comparison": "data\\figures\\monsoon_comparison.png",
-    "first_year_timeseries": "data\\figures\\first_year_timeseries.png"
+    "monthly_cycle": "data\\figures\\monthly_cycle",
+    "monsoon_comparison": "data\\figures\\monsoon_comparison",
+    "first_year_timeseries": "data\\figures\\first_year_timeseries"
   }
 }

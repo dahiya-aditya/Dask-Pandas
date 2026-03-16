@@ -1,0 +1,32 @@
+{
+  "dataset": "ERA5 Large South Asia (2024)",
+  "region": {
+    "name": "South Asia",
+    "north": 35.0,
+    "south": 5.0,
+    "west": 65.0,
+    "east": 100.0
+  },
+  "grid_shape": {
+    "time_steps": 1464,
+    "lat_points": 121,
+    "lon_points": 141
+  },
+  "temperature_2024": {
+    "annual_mean_c": 22.49,
+    "annual_max_c": 29.11,
+    "annual_min_c": 13.26,
+    "days_with_any_area_above_35c": 309,
+    "days_with_any_area_above_40c": 193,
+    "peak_frac_above_35c_pct": 25.1,
+    "hottest_month": "Jun"
+  },
+  "energy_budget": {
+    "annual_mean_net_surface_rad_wm2": 19.66,
+    "peak_solar_month": "Apr"
+  },
+  "cloud_cover": {
+    "annual_mean_pct": 54.6,
+    "peak_cloud_month": "Jul"
+  }
+}

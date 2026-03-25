@@ -26,7 +26,7 @@ if __name__ == "__main__":
     #2. Specifying data path
     data_path = "api_requests/data/raw/era5_12gb_2024_adwita/*.nc"
 
-    #3. Optimal pipeline with xarray, chunking wrt time
+    #3. Optimal pipeline with xarray, by chunking time
     ds_time_1 = xr.open_mfdataset(data_path, chunks={'valid_time': 24}, parallel=True)
 
     # Spatial averaging
@@ -41,7 +41,7 @@ if __name__ == "__main__":
     temporal_agg = ds_time_1['t2m'].mean(dim='valid_time').compute()
     print(f"   Done in {time.time() - start:.2f} seconds.\n")
 
-    # Anomaly  computation
+    # Anomaly computation
     print("3. Calculating Monthly Anomalies...")
     start = time.time()
     climatology = ds_time_1['t2m'].groupby('valid_time.month').mean('valid_time')

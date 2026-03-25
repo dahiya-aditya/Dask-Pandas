@@ -9,5 +9,4 @@ data/raw/*_extracted/
 data/raw/downloads/
 data/raw/era5_large_overwhelm/
 data/raw/tmp_extract_test/
-api_requests/data/
-*.zip
+api_requests/data/*.zip 

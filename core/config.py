@@ -37,7 +37,7 @@ LARGE_SOUTH_ASIA = DatasetConfig(
     data_dir=Path("data/raw/era5_large_overwhelm"),
     instant_file="data_stream-oper_stepType-instant.nc",
     accum_file="data_stream-oper_stepType-accum.nc",
-    archive_zip=None,  # Pre-extracted; no zip file
+    archive_zip=Path("data/raw/era5_full_2024_12gb.zip"),
 )
 
 # ============================================================================

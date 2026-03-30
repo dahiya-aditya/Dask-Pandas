@@ -78,6 +78,69 @@ South Asia 2024 large-scale run    : python south_asia_2024_large_analysis.py
 Minimal loading example            : python south_asia_naive_load_demo.py
 ```
 
+## Run Dask analysis and comparison
+Install required packages once in your environment:
+
+```text
+pip install xarray dask distributed netCDF4 zarr psutil flox
+```
+
+Run the Dask pipeline (default balanced chunks):
+
+```text
+python south_asia_2024_dask_analysis.py
+```
+
+Run with explicit chunk settings (for experimentation):
+
+```text
+python south_asia_2024_dask_analysis.py --chunk-time 240 --chunk-lat 120 --chunk-lon 140 --no-figures
+python south_asia_2024_dask_analysis.py --chunk-time 96 --chunk-lat 80 --chunk-lon 80 --no-figures
+python south_asia_2024_dask_analysis.py --chunk-time 24 --chunk-lat 30 --chunk-lon 30 --no-figures
+```
+
+Run automated chunk-strategy benchmark:
+
+```text
+python benchmark_dask_chunking.py
+```
+
+Run poor-vs-revised Dask pipeline experiment:
+
+```text
+python dask_revision_experiment.py
+```
+
+Validate Pandas vs Dask output consistency:
+
+```text
+python validate_pandas_vs_dask.py
+```
+
+Generate consolidated case-study report from outputs:
+
+```text
+python generate_case_study_report.py
+```
+
+Generated Dask output files:
+
+```text
+data/results/dask_daily_regional_means.csv
+data/results/dask_large_monthly_climatology.csv
+data/results/dask_large_temperature_anomalies.csv
+data/results/dask_heat_extreme_daily.csv
+data/results/dask_large_summary.json
+data/results/pandas_vs_dask_validation.csv
+data/results/pandas_vs_dask_validation_summary.json
+data/results/dask_chunk_benchmark.csv
+data/results/dask_chunk_benchmark.json
+data/results/dask_revision_experiment.csv
+data/results/dask_revision_experiment.json
+data/results/dask_case_study_report.json
+docs/dask_case_study_report.md
+```
+
 ## API request scripts
 Run these request scripts from the project root in the same command-line interface.
 

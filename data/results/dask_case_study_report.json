@@ -21,7 +21,7 @@
   "best_profile": "balanced",
   "worst_profile": "tiny_chunks",
   "unexpected_behavior": "Tiny chunks were slower than larger chunks due to scheduler overhead and graph size.",
-  "poor_vs_revised_speedup": 1.023,
+  "poor_vs_revised_speedup": 1.778,
   "evidence": {
     "pandas_summary": "data/results/large_summary.json",
     "dask_summary": "data/results/dask_large_summary.json",

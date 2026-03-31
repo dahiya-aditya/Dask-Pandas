@@ -9,14 +9,14 @@
   },
   "scheduler": "threads",
   "chunks": {
-    "valid_time": 24,
-    "latitude": 30,
-    "longitude": 30
+    "valid_time": 96,
+    "latitude": 80,
+    "longitude": 80
   },
   "rows_daily": 366,
   "rows_heat_daily": 366,
   "daily_columns": 12,
-  "elapsed_seconds": 55.263,
+  "elapsed_seconds": 35.186,
   "temperature_2024": {
     "annual_mean_c": 22.49,
     "annual_max_c": 29.11,

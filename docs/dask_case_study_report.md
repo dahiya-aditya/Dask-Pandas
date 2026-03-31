@@ -23,7 +23,7 @@
 - Best chunk profile: balanced
 - Worst chunk profile: tiny_chunks
 - Unexpected behavior: Tiny chunks were slower than larger chunks due to scheduler overhead and graph size.
-- Poor vs revised relative speedup: 1.023x
+- Poor vs revised relative speedup: 1.778x
 
 ## Evidence Files
 - Pandas summary: data/results/large_summary.json

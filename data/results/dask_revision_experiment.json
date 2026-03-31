@@ -8,7 +8,7 @@
       "latitude": 30,
       "longitude": 30
     },
-    "elapsed_seconds": 97.183,
+    "elapsed_seconds": 62.565,
     "rows_daily": 366,
     "annual_mean_t2m_c": 22.49,
     "anti_patterns": [
@@ -24,7 +24,7 @@
       "latitude": 80,
       "longitude": 80
     },
-    "elapsed_seconds": 94.968,
+    "elapsed_seconds": 35.186,
     "rows_daily": 366,
     "annual_mean_t2m_c": 22.49,
     "good_practices": [
@@ -33,7 +33,7 @@
       "chunking chosen for time aggregation"
     ]
   },
-  "speedup_poor_over_revised": 1.023,
+  "speedup_poor_over_revised": 1.778,
   "annual_mean_temp_abs_diff_c": 0.0,
   "interpretation": {
     "unexpected_behavior": "Tiny chunks and repeated compute calls can make Dask slower than expected because scheduler overhead dominates useful computation.",

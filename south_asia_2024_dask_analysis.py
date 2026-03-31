@@ -74,8 +74,14 @@ def _spatial_subset(ds: xr.Dataset, region: dict[str, float]) -> xr.Dataset:
 
 
 def _open_chunked_dataset(path: Path, chunks: dict[str, int]) -> xr.Dataset:
-    """Open NetCDF lazily with xarray+dask."""
-    return xr.open_dataset(path, engine="netcdf4", chunks=chunks)
+    """
+    Open NetCDF lazily with native file chunks, then rechunk for compute.
+
+    This avoids splitting on-disk chunk boundaries during initial reads,
+    which can trigger xarray performance warnings.
+    """
+    ds = xr.open_dataset(path, engine="netcdf4", chunks={})
+    return ds.chunk(chunks)
 
 
 def _monthly_anomaly(daily_df: pd.DataFrame) -> pd.DataFrame:

@@ -1,9 +1,9 @@
 {
   "profiles_tested": 3,
-  "total_elapsed_seconds": 244.667,
-  "best_profile": "time_heavy",
-  "best_elapsed_seconds": 54.793,
+  "total_elapsed_seconds": 127.399,
+  "best_profile": "balanced",
+  "best_elapsed_seconds": 34.576,
   "worst_profile": "tiny_chunks",
-  "worst_elapsed_seconds": 95.937,
+  "worst_elapsed_seconds": 55.263,
   "report_csv": "data/results/dask_chunk_benchmark.csv"
 }

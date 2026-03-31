@@ -1,0 +1,18 @@
+{
+  "tolerances": {
+    "atol": 0.001,
+    "rtol": 0.001
+  },
+  "checks": 35,
+  "tables": [
+    "daily_regional_means",
+    "heat_extremes",
+    "monthly_climatology",
+    "temperature_anomalies"
+  ],
+  "all_passed": true,
+  "min_pass_rate": 1.0,
+  "max_abs_overall": 0.00010000000000331966,
+  "max_rel_overall": 0.009090909090909195,
+  "report_csv": "data/results/pandas_vs_dask_validation.csv"
+}

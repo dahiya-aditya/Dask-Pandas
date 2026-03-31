@@ -1,28 +1,29 @@
 # Scaling Pandas with Dask: ERA5 Case Study Report
 
 ## Overall Progress
-- Completion estimate: 27.3% (3/11 requirement items fully evidenced)
-- Core validation pass status: not available
+- Completion estimate: 100.0% (11/11 requirement items fully evidenced)
+- Core validation pass status: True
 
 ## Core Tasks Status
 - ERA5 subset access: done
 - memory-stressing dataset config: done
 - baseline Pandas pipeline: done
-- equivalent Dask pipeline: not done
-- temporal/spatial/anomaly analyses: not done
-- Pandas vs Dask correctness validation: not done
+- equivalent Dask pipeline: done
+- temporal/spatial/anomaly analyses: done
+- Pandas vs Dask correctness validation: done
 
 ## Additional Tasks Status
-- chunk strategy experiments: not done
-- unexpected Dask behavior discussion: not done
-- developer effort and complexity comparison: partial
-- poor initial Dask pipeline then revision: not done
-- constraints-based interpretation (I/O/memory/parallelism): not done
+- chunk strategy experiments: done
+- unexpected Dask behavior discussion: done
+- developer effort and complexity comparison: done
+- poor initial Dask pipeline then revision: done
+- constraints-based interpretation (I/O/memory/parallelism): done
 
 ## Empirical Highlights
-- Best chunk profile: unknown
-- Worst chunk profile: unknown
-- Unexpected behavior: not observed yet
+- Best chunk profile: time_heavy
+- Worst chunk profile: tiny_chunks
+- Unexpected behavior: Tiny chunks were slower than larger chunks due to scheduler overhead and graph size.
+- Poor vs revised relative speedup: 1.023x
 
 ## Evidence Files
 - Pandas summary: data/results/large_summary.json
@@ -31,7 +32,16 @@
 - Chunk benchmark: data/results/dask_chunk_benchmark.csv
 - Revision experiment: data/results/dask_revision_experiment.json
 
+## Developer Effort, Complexity, and Debugging
+- Pandas implementation required less orchestration and was easier to reason about for direct transformations.
+- Dask implementation required extra decisions on chunking, lazy compute boundaries, and scheduler behavior.
+- Debugging Dask focused more on performance diagnostics (chunk warnings, graph overhead) than on output correctness.
+- Validation/benchmark scripts were necessary to provide equivalent confidence in Dask outputs.
+
+## Constraint-Based Interpretation
+- I/O: chunk-storage misalignment can increase read amplification and slow execution.
+- Memory: Dask reduced eager materialization pressure and enabled chunked processing at larger scale.
+- Parallelism: very small chunks increased scheduler overhead; tuned chunks improved wall-clock performance.
+
 ## Remaining Work
-- Add a short qualitative section on developer effort and debugging difficulty
-- Include one paragraph linking your benchmark outcomes to data I/O patterns and scheduler overhead
-- If validation is not all-pass, investigate columns with highest max_abs in pandas_vs_dask_validation.csv
+- None for assignment scope; optional narrative polish only.

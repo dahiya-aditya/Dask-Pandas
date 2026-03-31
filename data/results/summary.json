@@ -27,11 +27,11 @@
     "total_tp_mm": 403.7354736328125
   },
   "correlations": {
-    "temp_pressure": -0.8327096686229394
+    "temp_pressure": -0.8327096686229389
   },
   "figure_paths": {
-    "monthly_cycle": "data\\figures\\monthly_cycle",
-    "monsoon_comparison": "data\\figures\\monsoon_comparison",
-    "first_year_timeseries": "data\\figures\\first_year_timeseries"
+    "monthly_cycle": "data/figures/monthly_cycle",
+    "monsoon_comparison": "data/figures/monsoon_comparison",
+    "first_year_timeseries": "data/figures/first_year_timeseries"
   }
 }

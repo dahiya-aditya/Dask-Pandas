@@ -1,0 +1,46 @@
+{
+  "experiment": "poor_vs_revised_dask_pipeline",
+  "poor": {
+    "name": "poor",
+    "scheduler": "threads",
+    "chunks": {
+      "valid_time": 24,
+      "latitude": 30,
+      "longitude": 30
+    },
+    "elapsed_seconds": 97.183,
+    "rows_daily": 366,
+    "annual_mean_t2m_c": 22.49,
+    "anti_patterns": [
+      "tiny chunks",
+      "storage-chunk misalignment"
+    ]
+  },
+  "revised": {
+    "name": "revised",
+    "scheduler": "threads",
+    "chunks": {
+      "valid_time": 96,
+      "latitude": 80,
+      "longitude": 80
+    },
+    "elapsed_seconds": 94.968,
+    "rows_daily": 366,
+    "annual_mean_t2m_c": 22.49,
+    "good_practices": [
+      "single lazy graph",
+      "single compute phase",
+      "chunking chosen for time aggregation"
+    ]
+  },
+  "speedup_poor_over_revised": 1.023,
+  "annual_mean_temp_abs_diff_c": 0.0,
+  "interpretation": {
+    "unexpected_behavior": "Tiny chunks and repeated compute calls can make Dask slower than expected because scheduler overhead dominates useful computation.",
+    "revision_effect": "The revised graph reduces overhead by fusing operations and computing once near output."
+  },
+  "outputs": {
+    "csv": "data/results/dask_revision_experiment.csv",
+    "json": "data/results/dask_revision_experiment.json"
+  }
+}

@@ -1,0 +1,4 @@
+profile,chunk_time,chunk_lat,chunk_lon,elapsed_seconds,rows_daily,annual_mean_t2m_c
+time_heavy,240,120,140,54.793,366,22.49
+balanced,96,80,80,93.823,366,22.49
+tiny_chunks,24,30,30,95.937,366,22.49

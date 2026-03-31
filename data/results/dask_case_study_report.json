@@ -18,7 +18,7 @@
     "constraints-based interpretation (I/O/memory/parallelism)": true
   },
   "all_passed": true,
-  "best_profile": "time_heavy",
+  "best_profile": "balanced",
   "worst_profile": "tiny_chunks",
   "unexpected_behavior": "Tiny chunks were slower than larger chunks due to scheduler overhead and graph size.",
   "poor_vs_revised_speedup": 1.023,

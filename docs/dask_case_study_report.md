@@ -20,7 +20,7 @@
 - constraints-based interpretation (I/O/memory/parallelism): done
 
 ## Empirical Highlights
-- Best chunk profile: time_heavy
+- Best chunk profile: balanced
 - Worst chunk profile: tiny_chunks
 - Unexpected behavior: Tiny chunks were slower than larger chunks due to scheduler overhead and graph size.
 - Poor vs revised relative speedup: 1.023x
@@ -42,6 +42,13 @@
 - I/O: chunk-storage misalignment can increase read amplification and slow execution.
 - Memory: Dask reduced eager materialization pressure and enabled chunked processing at larger scale.
 - Parallelism: very small chunks increased scheduler overhead; tuned chunks improved wall-clock performance.
+
+## Why Rechunk Improved Runtime
+- Update made: open with native storage chunks first, then rechunk for compute.
+- Operational effect: I/O remains storage-aligned while compute uses chunk sizes suited for aggregations.
+- Warning reduction: avoids splitting stored chunks during initial reads.
+- Runtime effect: fewer split reads and lower scheduling overhead from better chunk alignment.
+- Trade-off: rechunking is extra work and may increase temporary memory usage.
 
 ## Remaining Work
 - None for assignment scope; optional narrative polish only.

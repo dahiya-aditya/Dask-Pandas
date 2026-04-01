@@ -1,14 +1,13 @@
 # Dask-Pandas
 
 ## Objective
-To investigate how Dask enables scalable data processing for high-resolution weather datasets (ERA5) when in-memory Pandas workflows become impractical.
+Investigate how Dask enables scalable data processing when in-memory Pandas becomes impractical, using ERA5 as a concrete high-resolution weather dataset.
 
 ## Dataset
-ERA5 hourly data on single levels from 1940 to present.
+ERA5 hourly data on single levels (Copernicus Climate Change Service / ECMWF).
 
-ERA5 is the fifth-generation global climate reanalysis produced by CDS ECMWF. It provides hourly estimates of a wide range of atmospheric, ocean-wave, and land-surface variables from 1940 to the present. The dataset is distributed by the Copernicus Climate Change Service and features a high-resolution 0.25 x 0.25 degree grid. Because of its high dimensionality, it serves as an excellent case study for evaluating how Dask enables scalable analysis when Pandas becomes impractical.
-
-Data source: https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels
+Data source:
+https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels
 
 Current request profiles used in this repository:
 ```text
@@ -18,96 +17,126 @@ Full 2024 request (~12 GB)                  -> large-volume processing and scala
 
 ## Workflow
 ```text
-Step 01  Download a small chunk of the dataset and analyze it using Pandas and Dask.
-Step 02  Implement baseline analysis on this small chunk with Pandas.
-Step 03  Download a larger subset and confirm that Pandas becomes impractical.
-Step 04  Implement a similar pipeline using Dask with lazy loading and chunked computation.
-Step 05  Compare consistency of results between Dask and Pandas.
+Step 01  Build baseline Pandas analyses on feasible subsets.
+Step 02  Run large-volume South Asia pipeline with Pandas baseline.
+Step 03  Implement aligned Dask pipeline with lazy loading and chunking.
+Step 04  Benchmark runtime and memory across chunk strategies.
+Step 05  Validate Pandas vs Dask consistency for daily metrics and anomalies.
 ```
 
-## Tasks completed
-```text
-Done 01  Downloaded and analyzed a small chunk of the dataset (about 464 MB, 3 variables) with Pandas.
-Done 02  Downloaded more than 12 GB of ERA5 data (2024 full-year request profile).
-Done 03  Implemented two Pandas analysis pipelines.
-      Central India analysis on the compact (464 MB) subset.
-      South Asia 2024 analysis on the large (12 GB) subset.
-Done 04  Generated derived outputs in CSV, JSON, and PDF figure formats.
-Done 05  Organized the codebase into dedicated folders for shared core modules and API request scripts.
-Done 06  Dask implementation and direct Pandas vs Dask consistency benchmarking remain in progress.
-```
-
-## Repository structure
+## Repository Structure
 ```text
 Dask-Pandas/
 │
 ├── core/
-│   ├── config.py                               # dataset paths, regions, thresholds, plotting settings
-│   ├── housekeeping.py                         # data layout checks and output directory setup
-│   └── utils.py                                # shared output and figure helpers
+│   ├── config.py
+│   ├── housekeeping.py
+│   └── utils.py
 │
 ├── api_requests/
-│   ├── request_era5_consistent_slice_464mb.py # compact consistent-slice request
-│   └── request_era5_full_2024_12gb.py         # full 2024 high-volume request
+│   ├── request_era5_consistent_slice_464mb.py
+│   └── request_era5_full_2024_12gb.py
 │
-├── central_india_464mb_analysis.py             # Central India (464 MB) Pandas analysis
-├── south_asia_2024_large_analysis.py           # South Asia 2024 large-scale Pandas analysis
-└── south_asia_naive_load_demo.py               # minimal NetCDF loading demo
+├── data/
+│   ├── raw/
+│   │   ├── era5_consistent_slice_extracted/
+│   │   └── era5_large_overwhelm/
+│   ├── results/
+│   │   ├── central_india/
+│   │   │   ├── daily_metrics.csv
+│   │   │   └── summary.json
+│   │   ├── south_asia/
+│   │   │   ├── pandas_daily_metrics.csv
+│   │   │   ├── pandas_summary.json
+│   │   │   ├── dask_daily_metrics.csv
+│   │   │   └── dask_summary.json
+│   │   └── benchmark/
+│   │       ├── runtime_table.csv
+│   │       ├── consistency_daily.csv
+│   │       ├── consistency_anomaly.csv
+│   │       ├── chunk_sweep_table.csv
+│   │       └── summary.json
+│   └── figures/
+│
+├── central_india_464mb_analysis.py
+├── south_asia_2024_large_analysis.py
+├── south_asia_2024_dask_aligned.py
+├── dask_vs_pandas_benchmark.py
+├── south_asia_naive_load_demo.py
+└── analysis_using_dask.py
 ```
 
-## Setup instructions
-Run these commands in any command-line interface from the project root.
+## Setup
+Run commands in any command-line interface from project root.
 
 ```text
 Required raw folders
   data/raw/era5_consistent_slice_extracted/
   data/raw/era5_large_overwhelm/
 
-Verification command
+Verification
   python -m core.housekeeping
 ```
 
-This command creates data/results and data/figures if missing, verifies required NetCDF files, and extracts configured archives when applicable.
-
-## Run analyses
-Use the same command-line interface to run each script below.
-
+## Run Analyses
 ```text
-Central India seasonal analysis    : python central_india_464mb_analysis.py
-South Asia 2024 large-scale run    : python south_asia_2024_large_analysis.py
-Minimal loading example            : python south_asia_naive_load_demo.py
+Central India Pandas analysis
+  python central_india_464mb_analysis.py
+
+South Asia Pandas analysis (force NetCDF recompute)
+  python south_asia_2024_large_analysis.py --recompute
+
+South Asia Dask aligned analysis (full window)
+  python south_asia_2024_dask_aligned.py --sample-days 0 --chunk-hours auto
 ```
 
-## API request scripts
-Run these request scripts from the project root in the same command-line interface.
-
+## Run Benchmark
+Main full-window benchmark:
 ```text
-Compact consistent-slice request   : python api_requests/request_era5_consistent_slice_464mb.py
-Full 2024 request                  : python api_requests/request_era5_full_2024_12gb.py
+python -u dask_vs_pandas_benchmark.py --sample-days 0 --chunk-hours 96 --skip-central
 ```
 
-## Workspace layout
+Full-window chunk sweep benchmark:
 ```text
-Dask-Pandas/
-│
-├── central_india_464mb_analysis.py  # Central India analysis entry point
-├── south_asia_2024_large_analysis.py # South Asia 2024 analysis entry point
-├── south_asia_naive_load_demo.py     # minimal loading demo
-│
-├── core/
-│   ├── config.py                    # dataset paths, regions, thresholds, plotting defaults
-│   ├── housekeeping.py              # setup checks and output directory verification
-│   └── utils.py                     # shared helper functions
-├── api_requests/                    # ERA5 API download scripts
-├── docs/                            # assignment PDFs and background material
-│
-└── data/
-    ├── raw/             # local ERA5 payloads and extracted NetCDF files
-    ├── results/         # CSV and JSON analysis outputs
-    └── figures/         # generated PDF plots for Central India and South Asia analyses
+python -u dask_vs_pandas_benchmark.py --sample-days 0 --chunk-hours 96 --chunk-sweep "24,48,96,192,auto" --skip-central
 ```
 
-Raw ERA5 downloads and extracted NetCDF files are intentionally ignored by Git through .gitignore because they are large local datasets. The derived tables, summaries, figures, and code remain in the repository. The raw data can be downloaded using the API request scripts.
+## Project Report
+Detailed benchmarking results, consistency tables, methodological discussion,
+and assignment write-up are maintained in:
+
+```text
+report/report.tex
+```
+
+Generated benchmark artifacts are stored under:
+
+```text
+data/results/benchmark/
+```
+
+### Compile the report
+From the report directory, run:
+
+```text
+pdflatex --shell-escape report.tex
+```
+
+To regenerate bibliography entries after edits to refs.bib:
+
+```text
+bibtex refs
+pdflatex --shell-escape report.tex
+pdflatex --shell-escape report.tex
+```
+
+Do not modify:
+
+```text
+report/preamble.tex
+```
+
+Raw ERA5 payloads are intentionally ignored by Git due to size. Derived outputs, scripts, and figures remain versioned.
 
 ## Team Members
 ```text

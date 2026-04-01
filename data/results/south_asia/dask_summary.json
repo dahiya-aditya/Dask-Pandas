@@ -1,0 +1,17 @@
+{
+  "dataset": "ERA5 Large South Asia (2024)",
+  "region": {
+    "name": "South Asia",
+    "north": 35.0,
+    "south": 5.0,
+    "west": 65.0,
+    "east": 100.0
+  },
+  "rows": 366,
+  "sample_days": 0,
+  "chunk_spec": "1464",
+  "runtime_seconds": 22.86,
+  "mean_t2m_c": 22.490801463767898,
+  "max_t2m_c": 29.11198457977152,
+  "min_t2m_c": 13.262092719566882
+}

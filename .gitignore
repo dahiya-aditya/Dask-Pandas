@@ -2,6 +2,11 @@ __pycache__/
 *.py[cod]
 *.zip.part
 .pytest_cache/
+.venv/
+
+# VS Code workspace files (keep shared settings)
+.vscode/*
+!.vscode/settings.json
 
 # Local raw ERA5 downloads and extracted NetCDF payloads
 data/raw/*.nc
@@ -9,6 +14,11 @@ data/raw/*_extracted/
 data/raw/downloads/
 data/raw/era5_large_overwhelm/
 data/raw/tmp_extract_test/
-api_requests/data/*.zip api_requests/data/
+api_requests/data/*.zip
+api_requests/data/
 *.zip
 *.nc
+
+# LaTeX build outputs
+report/*.aux
+report/*.log

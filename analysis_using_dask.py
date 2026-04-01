@@ -33,7 +33,8 @@ if __name__ == "__main__":
     print("Dataset opened with Dask chunks. Ready for analysis.\n")
     print("Variables in the dataset:", list(ds.data_vars))
 
-    # Spatial averaging
+    # Spatial averaging 
+    # t2m is the 2m temperature variable in the dataset. We will calculate the spatial average of t2m across the globe and also over South Asia.
     print("Calculating Spatial Average (Global Time Series)...")
     start = time.time()
     spatial_avg = ds['t2m'].mean(dim=['latitude', 'longitude']).compute()
@@ -59,20 +60,4 @@ if __name__ == "__main__":
     plt.grid()
     plt.show()  
 
-
-    # # Temporal aggregation
-    # print("2. Calculating Temporal Aggregation (Time-Averaged Map)...")
-    # start = time.time()
-    # temporal_agg = ds['t2m'].mean(dim='valid_time').compute()
-    # print(f"   Done in {time.time() - start:.2f} seconds.\n")
-
-    # # Anomaly computation
-    # print("3. Calculating Monthly Anomalies...")
-    # start = time.time()
-    # climatology = ds['t2m'].groupby('valid_time.month').mean('valid_time')
-    # anomalies = (ds['t2m'].groupby('valid_time.month') - climatology).compute()
-    # print(f"   Done in {time.time() - start:.2f} seconds.\n")
-
-    # #4. To exit the dashboard 
-    # input("Press Enter to shut down the cluster...")
-
+    # 

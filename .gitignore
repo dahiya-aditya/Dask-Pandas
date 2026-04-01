@@ -4,9 +4,8 @@ __pycache__/
 .pytest_cache/
 .venv/
 
-# VS Code workspace files (keep shared settings)
-.vscode/*
-!.vscode/settings.json
+# VS Code workspace files
+.vscode/
 
 # Local raw ERA5 downloads and extracted NetCDF payloads
 data/raw/*.nc

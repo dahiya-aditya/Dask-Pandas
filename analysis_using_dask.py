@@ -9,7 +9,9 @@ import zipfile
 import os
 import time
 import glob
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt
+
+from core.config import HEAT_DANGER_THRESHOLD, HEAT_WARN_THRESHOLD, PLOT_STYLE 
 
 if __name__ == "__main__":
     #1. Setting up Dask cluster 
@@ -49,15 +51,14 @@ if __name__ == "__main__":
     print(f"Done in {time.time() - start:.2f} seconds.\n")
 
     # Plotting spatial average for the Global time series and South Asia time series
-    plt.figure(figsize=(12, 6))
-    plt.plot(spatial_avg['valid_time'], spatial_avg.values - 273.15, label='Global Average')
-    plt.plot(spatial_avg_south_asia['valid_time'], spatial_avg_south_asia - 273.15, label='South Asia Average')
-    plt.plot(spatial_avg_south_asia['valid_time'], spatial_avg_south_asia.values - 273.15, label='South Asia (Hourly Range)', alpha=0.2)
-    plt.xlabel('Time')
-    plt.ylabel('Temperature (°C)')
-    plt.title('Spatial Average of 2m Temperature')
-    plt.legend()
-    plt.grid()
-    plt.show()  
-
-    # 
+    # plt.figure(figsize=(12, 6))
+    # plt.plot(spatial_avg['valid_time'], spatial_avg.values - 273.15, label='Global Average')
+    # plt.plot(spatial_avg_south_asia['valid_time'], spatial_avg_south_asia - 273.15, label='South Asia Average')
+    # plt.plot(spatial_avg_south_asia['valid_time'], spatial_avg_south_asia.values - 273.15, label='South Asia (Hourly Range)', alpha=0.2)
+    # plt.xlabel('Time')
+    # plt.ylabel('Temperature (°C)')
+    # plt.title('Spatial Average of 2m Temperature')
+    # plt.legend()
+    # plt.grid()
+    # plt.show()
+  

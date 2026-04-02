@@ -47,7 +47,7 @@ if __name__ == "__main__":
     tisr_avg_global = ds['tisr'].mean(dim=['latitude', 'longitude'])
     tisr_avg_south_asia = south_asia_ds['tisr'].mean(dim=['latitude', 'longitude'])
 
-    spatial_avg, spatial_avg_south_asia = dask.compute(tisr_avg_global, tisr_avg_south_asia)
+    tisr_spatial_avg_global, tisr_spatial_avg_south_asia = dask.compute(tisr_avg_global, tisr_avg_south_asia)
     print(f"Done in {time.time() - start:.2f} seconds.\n")
 
     # this analysis however is flawed as taking mean temperature across the globe is not scientifically meaningful.
@@ -55,10 +55,10 @@ if __name__ == "__main__":
 
     # Plotting spatial average for the Global time series and South Asia time series
     plt.figure(figsize=(12, 6))
-    plt.plot(tisr_avg_global['valid_time'], (tisr_avg_global - 273.15).rolling(valid_time=24, center=True).mean(), label='Global Average')
-    plt.plot(tisr_avg_global['valid_time'], tisr_avg_global - 273.15, color='#1f77b4', alpha=0.3, label='Hourly Range')
-    plt.plot(tisr_avg_south_asia['valid_time'], (tisr_avg_south_asia - 273.15).rolling(valid_time=24, center=True).mean(), color="#ff120e", label='South Asia Average')
-    plt.plot(tisr_avg_south_asia['valid_time'], tisr_avg_south_asia - 273.15, color="#ff120e", alpha=0.3, label='Hourly Range')
+    plt.plot(tisr_spatial_avg_global['valid_time'], (tisr_spatial_avg_global / 3600).rolling(valid_time=24, center=True).mean(), label='Global Average')
+    plt.plot(tisr_spatial_avg_global['valid_time'], tisr_spatial_avg_global / 3600, color='#1f77b4', alpha=0.3, label='Hourly Range')
+    plt.plot(tisr_spatial_avg_south_asia['valid_time'], (tisr_spatial_avg_south_asia / 3600).rolling(valid_time=24, center=True).mean(), color="#ff120e", label='South Asia Average')
+    plt.plot(tisr_spatial_avg_south_asia['valid_time'], tisr_spatial_avg_south_asia / 3600, color="#ff120e", alpha=0.3, label='Hourly Range')
 
     plt.xlabel('Time')
     plt.ylabel('TOA Incident Short Wave Radiation (W/m²)')
@@ -82,10 +82,10 @@ if __name__ == "__main__":
 
     # Plotting spatial average for the Global time series and South Asia time series
     plt.figure(figsize=(12, 6))
-    plt.plot(global_avg_str['valid_time'], global_avg_str.rolling(valid_time=24, center=True).mean(), color='#2ca02c', label='Global Average')
-    plt.plot(global_avg_str['valid_time'], global_avg_str, color='#2ca02c', alpha=0.3, label='Global Hourly Range')
-    plt.plot(south_asia_avg_str['valid_time'], south_asia_avg_str.rolling(valid_time=24, center=True).mean(), color='#9467bd', label='South Asia Average')
-    plt.plot(south_asia_avg_str['valid_time'], south_asia_avg_str, color='#9467bd', alpha=0.3, label='South Asia Hourly Range')
+    plt.plot(global_avg_str['valid_time'], (global_avg_str / 3600).rolling(valid_time=24, center=True).mean(), color='#2ca02c', label='Global Average')
+    plt.plot(global_avg_str['valid_time'], global_avg_str / 3600, color='#2ca02c', alpha=0.3, label='Global Hourly Range')
+    plt.plot(south_asia_avg_str['valid_time'], (south_asia_avg_str / 3600).rolling(valid_time=24, center=True).mean(), color='#9467bd', label='South Asia Average')
+    plt.plot(south_asia_avg_str['valid_time'], south_asia_avg_str / 3600, color='#9467bd', alpha=0.3, label='South Asia Hourly Range')
 
     plt.xlabel('Time')
     plt.ylabel('Surface Net Thermal Radiation (W/m²)')
@@ -107,10 +107,10 @@ if __name__ == "__main__":
 
     # Plotting spatial average for the Global time series and South Asia time series
     plt.figure(figsize=(12, 6))
-    plt.plot(global_avg_ssr['valid_time'], global_avg_ssr.rolling(valid_time=24, center=True).mean(), color='#2ca02c', label='Global Average')
-    plt.plot(global_avg_ssr['valid_time'], global_avg_ssr, color='#2ca02c', alpha=0.3, label='Global Hourly Range')
-    plt.plot(south_asia_avg_ssr['valid_time'], south_asia_avg_ssr.rolling(valid_time=24, center=True).mean(), color='#9467bd', label='South Asia Average')
-    plt.plot(south_asia_avg_ssr['valid_time'], south_asia_avg_ssr, color='#9467bd', alpha=0.3, label='South Asia Hourly Range')
+    plt.plot(global_avg_ssr['valid_time'], (global_avg_ssr / 3600).rolling(valid_time=24, center=True).mean(), color='#2ca02c', label='Global Average')
+    plt.plot(global_avg_ssr['valid_time'], global_avg_ssr / 3600, color='#2ca02c', alpha=0.3, label='Global Hourly Range')
+    plt.plot(south_asia_avg_ssr['valid_time'], (south_asia_avg_ssr / 3600).rolling(valid_time=24, center=True).mean(), color='#9467bd', label='South Asia Average')
+    plt.plot(south_asia_avg_ssr['valid_time'], south_asia_avg_ssr / 3600, color='#9467bd', alpha=0.3, label='South Asia Hourly Range')
 
     plt.xlabel('Time')
     plt.ylabel('Surface Net Short Wave Radiation (W/m²)')

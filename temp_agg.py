@@ -73,25 +73,25 @@ VAR_META = {
 # Chunk sizes below are chosen to produce around 50–200 MB chunks.
 chunking_strat = {
     "time_first": {
-        "chunks":{"time": 4, "latitude": -1, "longitude": -1},#1 chunk = 1 day
+        "chunks":{"valid_time": 4, "latitude": -1, "longitude": -1},#1 chunk = 1 day
         "colour":"blue",
         "label":"Time-First\n(4 time steps / chunk)",
     },
     "balanced":{
-        "chunks":{"time": 120, "latitude": 30, "longitude": 30},# ~100 MB chunks
+        "chunks":{"valid_time": 120, "latitude": 30, "longitude": 30},# ~100 MB chunks
         "colour":"green",
         "label":"Balanced\n(120 × 30 × 30)",
     },
     "space_first": {
-        "chunks":{"time": -1, "latitude": 20, "longitude": 20},# Entire time axis in one chunk
+        "chunks":{"valid_time": -1, "latitude": 20, "longitude": 20},# Entire time axis in one chunk
         "colour":"red",
         "label":"Space-First\n(full time / 20 × 20 spatial)",
     },
 }
 chunk_size_exp = {
-    "time_4":{"time": 4,  "latitude": -1, "longitude": -1},
-    "time_8":{"time": 8,  "latitude": -1, "longitude": -1},
-    "time_16":{"time": 16, "latitude": -1, "longitude": -1},
+    "time_4":{"valid_time": 4,  "latitude": -1, "longitude": -1},
+    "time_8":{"valid_time": 8,  "latitude": -1, "longitude": -1},
+    "time_16":{"valid_time": 16, "latitude": -1, "longitude": -1},
 }
 
 #  HELPER FUNCTIONS
@@ -131,7 +131,7 @@ def monthly_aggregate_xarray(ds, var_names):
         spatial_mean = ds[vname].mean(dim=["latitude", "longitude"])
 
         # resample to monthly
-        monthly = spatial_mean.resample(time="ME")  # "ME" = month-end (pandas 2.2+)
+        monthly = spatial_mean.resample(valid_time="ME")  # "ME" = month-end (pandas 2.2+)
 
         # sum for precipitation, mean for everything else
         if agg_method == "sum":
@@ -196,7 +196,7 @@ def benchmark_strategy(strategy_name, strategy_cfg, var_names_instant, var_names
 
     # convert to dataframe and add month labels
     df = result_ds.to_dataframe().reset_index()
-    df["month"] = df["time"].dt.month
+    df["month"] = df["valid_time"].dt.month
     df["month_abbr"] = df["month"].apply(lambda m: MONTH_ABBR[m - 1])
 
     # rename columns to include unit suffix e.g. t2m -> t2m_°C
@@ -301,8 +301,8 @@ def plot_monthly_climatology(best_df: pd.DataFrame, strategy_name: str):
 
     for idx, (vname, col) in enumerate(col_map.items()):
         ax = axes[idx]
-        long_name = meta[0]
-        unit = meta[1]
+        long_name = VAR_META[vname][0]
+        unit = VAR_META[vname][1]
 
         monthly_vals = (best_df.groupby("month")[col].mean().reindex(range(1, 13)))
 

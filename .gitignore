@@ -12,3 +12,5 @@ data/raw/tmp_extract_test/
 api_requests/data/*.zip api_requests/data/
 *.zip
 *.nc
+.DS_Store
+*.py~

@@ -65,19 +65,17 @@ if __name__ == "__main__":
     plt.title('Spatial Average of 2m Temperature')
     plt.legend()
     plt.grid()
+
+    print("Displaying t2m plot. CLOSE THE PLOT WINDOW TO CONTINUE TO TCC...")
     plt.show()
 
 
     #2. Total Cloud Cover (tcc)
-    print("Calculating Spatial Average of Total Cloud Cover (Global and South Asia)...")
+    print("\nCalculating Spatial Average of Total Cloud Cover (Global and South Asia)...")
     start = time.time()
 
-    ds_chunked = dask.chunk({'valid_time': 168, 'latitude': 50, 'longitude': 50}, data_path, parallel=True)
-    # south_asia_ds_chunked = south_asia_ds.chunk({'valid_time': 168, 'latitude': 50, 'longitude': 50})
-    south_asia_ds_chunked = ds_chunked.sel(latitude=slice(35, 5), longitude=slice(65, 100))
-
-    global_avg_tcc = ds_chunked['tcc'].mean(dim=['latitude', 'longitude'])
-    south_asia_avg_tcc = south_asia_ds_chunked['tcc'].mean(dim=['latitude', 'longitude'])   
+    global_avg_tcc = ds['tcc'].mean(dim=['latitude', 'longitude'])
+    south_asia_avg_tcc = south_asia_ds['tcc'].mean(dim=['latitude', 'longitude'])   
 
     global_avg_tcc, south_asia_avg_tcc = dask.compute(global_avg_tcc, south_asia_avg_tcc)
     print(f"Done in {time.time() - start:.2f} seconds.\n")  
@@ -96,6 +94,3 @@ if __name__ == "__main__":
     plt.grid()
     plt.show() 
 
-
-## these dont run simultanuously as they are computationally intensive. Run one at a time. 
-## solution: make different scripts for different chunking strategies for all variables (at once). 

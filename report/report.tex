@@ -77,6 +77,9 @@ Two ERA5 request profiles were used:
     scalability evaluation.
 \end{itemize}
 
+ERA5 reanalysis data was accessed from the Copernicus Climate Data Store
+(CDS) \citep{era5_cds}.
+
 The analysis variables include near-surface temperature and radiation terms,
 with daily statistics and anomaly comparisons.
 
@@ -313,7 +316,7 @@ how much parallel processing can be used, and how much memory is required.
     resources.
 \end{itemize}
 
-\subsection{Effect of Time-Axis Chunk Size}
+\subsubsection{Effect of Time-Axis Chunk Size}
 To isolate the role of time-axis chunking, we conducted a secondary experiment
 varying only the \verb|valid_time| chunk size while leaving spatial dimensions
 unchunked.
@@ -341,7 +344,7 @@ things down because of scheduler overhead. After a point, the number of tasks
 stops changing much, so further speedups mainly come from more efficient
 computation rather than fewer tasks.
 
-\subsection{Summary}
+\subsubsection{Summary}
 Overall, these results show that the best chunking balances task size and
 memory use. Using moderately large chunks along the time axis gives the best
 performance, as it reduces scheduling overhead while still allowing good

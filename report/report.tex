@@ -17,7 +17,7 @@
     }
 
 % ---- enter the team number below
-\rhead{Team Dask-Pandas}
+\rhead{Team Number 07}
 
 % --------------------------------------------------------------------
 % --------------------------------------------------------------------
@@ -31,17 +31,6 @@
 % --------------------------------------------------------------------
 % --------------------------------------------------------------------
 
-\begin{abstract}
-This report presents a case study on scaling ERA5 weather analysis from an
-eager Pandas workflow to a chunked Dask workflow. We benchmark runtime and
-memory, validate numerical parity, and analyze practical trade-offs in
-chunking and execution strategy. Beyond performance, we include a focused
-anomaly analysis for South Asia in 2024 and summarize implementation effort,
-debugging complexity, and lessons for reproducible scientific data pipelines.
-\end{abstract}
-
-
-
 % --------------------------------------------------------------------
 % --------------------------------------------------------------------
 % ---- WRITE YOUR REPORT BELOW
@@ -53,6 +42,9 @@ high-dimensional case study with multiple variables, hourly time steps, and
 spatial grids. The assignment objective is not only runtime comparison but also
 understanding memory behavior, chunking effects, correctness parity, and
 implementation trade-offs in real workflows.
+In addition to runtime and memory benchmarking, we include a focused South Asia
+2024 anomaly analysis and document practical lessons for reproducible,
+large-scale scientific data pipelines.
 
 
 \section{Related Work}
@@ -179,6 +171,13 @@ chunk splitting during file I/O. This demonstrates a critical insight:
 optimal chunking must balance parallelism gains against scheduler overhead
 and I/O alignment with stored data layout.
 
+We also observed a runtime behavior specific to parallel visualization:
+\verb|RuntimeError| in the GUI main loop during plotting when
+worker threads interacted with an interactive backend. This was non-fatal for
+computed outputs but noisy in logs. We resolved it by forcing a non-interactive
+Matplotlib backend (Agg) and explicitly closing figures and the Dask client/
+cluster in a \verb|finally| block.
+
 \subsection{Developer effort comparison}
 Implementing the Dask pipeline required substantially more developer effort
 than the Pandas baseline in three dimensions:
@@ -204,6 +203,10 @@ runtime per verification cycle. Pandas required no such instrumentation.
 In aggregate: Dask required $\sim 1.5\times$ lines of glue code, $\sim 2\times$
 debugging time, and $\sim 3\times$ total testing cycles compared to the
 Pandas baseline to achieve commensurate confidence in results.
+
+Compared with the eager Pandas baseline, Dask debugging also shifted effort
+from straightforward line-level exceptions toward delayed \verb|.compute()|
+failures, scheduler diagnostics, and backend/threading interactions.
 
 \subsection{Anomaly analysis (South Asia, 2024)}
 The anomaly series shows coherent sub-seasonal variability rather than random
@@ -231,6 +234,39 @@ departure from a multi-decadal reference period.
     \caption{Relationships among anomaly variables (temperature, cloud, and radiation).}
 \end{figure}
 
+\section{Performance matrix and chunking strategy analysis}
+\subsection{Spatial averaging}
+To complement the global benchmark, we measured variable-level spatial-average
+runtime under three chunking profiles used in contributor analyses.
+
+\begin{table}[h]
+    \centering
+    \caption{Spatial-averaging runtime by chunking profile}
+    \begin{tabular}{llc}
+        \hline
+        Chunking profile & Variable(s) & Runtime (s) \\
+        \hline
+        \verb|valid_time=24| & \verb|t2m| & 114.81 \\
+        \verb|valid_time=24| & \verb|tcc| & 129.83 \\
+        \verb|valid_time=168, latitude=50, longitude=50| & \verb|ttr| & 160.74 \\
+        \verb|valid_time=168, latitude=50, longitude=50| & \verb|tsr| & 159.10 \\
+        \verb|chunks=auto| & \verb|tisr| & 12.30 \\
+        \verb|chunks=auto| & \verb|str| & 18.50 \\
+        \verb|chunks=auto| & \verb|ssr| & 31.54 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+These runs reinforce the chunking trade-off:
+\begin{itemize}
+    \item Fragmenting both spatial dimensions increased cross-chunk communication,
+    which slowed spatial reductions.
+    \item Time-only chunking reduced spatial shuffling but created many small tasks,
+    increasing scheduler overhead.
+    \item \verb|chunks=auto| gave the best practical balance in this environment,
+    reducing both scheduler pressure and data-shuffling overhead.
+\end{itemize}
+
 \section{Conclusion and Outlook}
 The assignment goals are largely satisfied: we built comparable Pandas and
 Dask pipelines, benchmarked runtime and memory under multiple chunk settings,
@@ -248,10 +284,28 @@ We thank the course team for providing the report template and project
 guidelines.
 
 \section{Author Contributions}
-All authors contributed to planning and implementation. Data acquisition,
-baseline analysis, Dask workflow development, benchmarking, validation, and
-report writing were completed collaboratively, with primary ownership divided
-across team members by module.
+Primary ownership by code area is as follows.
+\begin{itemize}
+    \item \textbf{Adwita Joglekar:} \path{contrib_adwita/} analyses:
+    \path{temperature_cloudcover_dask_analysis.py},
+    \path{toposphere_radiation_dask_analysis.py}, and
+    \path{surface_radiation_dask_analysis.py}.
+    \item \textbf{Brajesh K. Mahto:} \path{contrib_brajesh/} analyses,
+    validation, and case-study utilities:
+    \path{south_asia_2024_dask_analysis.py},
+    \path{benchmark_dask_chunking.py},
+    \path{validate_pandas_vs_dask.py},
+    \path{dask_revision_experiment.py},
+    \path{plot_anomaly_graphs.py}, and
+    \path{generate_case_study_report.py}.
+    \item \textbf{Saachi Sirola:} \path{contrib_saachi/temp_agg.py}
+    benchmark workflow and chunking-strategy experiment artifacts.
+    \item \textbf{Aditya Dahiya:} core infrastructure and integration work,
+    including \path{core/}, canonical/root workflows,
+    \path{run_all_analyses.py}, report integration/upstream consolidation,
+    cross-module cleanup, and final end-to-end harmonization of outputs and
+    documentation.
+\end{itemize}
 
 \section{Code availability}
 The code for this project is available at the following GitHub repository:

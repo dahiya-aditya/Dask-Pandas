@@ -12,7 +12,12 @@ from __future__ import annotations
 import argparse
 import json
 import time
+from pathlib import Path
 
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import xarray as xr
@@ -24,6 +29,17 @@ from core.config import LARGE_SOUTH_ASIA, REGIONS
 SOUTH_ASIA_RESULTS_DIR = config.RESULTS_DIR / "south_asia"
 OUTPUT_DAILY_CSV = SOUTH_ASIA_RESULTS_DIR / "dask_daily_metrics.csv"
 OUTPUT_SUMMARY_JSON = SOUTH_ASIA_RESULTS_DIR / "dask_summary.json"
+
+
+def figure_daily_t2m(daily_df: pd.DataFrame) -> plt.Figure:
+    """Simple daily mean temperature figure for aligned Dask output."""
+    fig, ax = plt.subplots(figsize=(10, 4.5))
+    ax.plot(pd.to_datetime(daily_df["time"]), daily_df["t2m_c"], lw=1.2, color="#1f77b4")
+    ax.set_title("South Asia Daily Mean Temperature (Dask aligned)")
+    ax.set_xlabel("Date")
+    ax.set_ylabel("t2m (C)")
+    ax.grid(alpha=0.3)
+    return fig
 
 
 def parse_args() -> argparse.Namespace:
@@ -58,9 +74,30 @@ def build_dataset_paths() -> list[str]:
 
 def region_subset(ds: xr.Dataset) -> xr.Dataset:
     region = REGIONS["south_asia"]
-    north, south = region["north"], region["south"]
-    west, east = region["west"], region["east"]
-    return ds.sel(latitude=slice(north, south), longitude=slice(west, east))
+    south, north = float(region["south"]), float(region["north"])
+    west, east = float(region["west"]), float(region["east"])
+
+    lat0 = float(ds.latitude.isel(latitude=0).values)
+    latn = float(ds.latitude.isel(latitude=-1).values)
+    if lat0 > latn:
+        lat_slice = slice(north, south)
+    else:
+        lat_slice = slice(south, north)
+
+    lon0 = float(ds.longitude.isel(longitude=0).values)
+    lonn = float(ds.longitude.isel(longitude=-1).values)
+    if lon0 > lonn:
+        lon_slice = slice(east, west)
+    else:
+        lon_slice = slice(west, east)
+
+    return ds.sel(latitude=lat_slice, longitude=lon_slice)
+
+
+def _open_chunked_dataset(path: Path, chunks: dict[str, int]) -> xr.Dataset:
+    """Open with native on-disk chunks, then rechunk for compute."""
+    ds = xr.open_dataset(path, engine="netcdf4", chunks={})
+    return ds.chunk(chunks)
 
 
 def apply_time_window(ds: xr.Dataset, sample_days: int) -> xr.Dataset:
@@ -74,25 +111,34 @@ def apply_time_window(ds: xr.Dataset, sample_days: int) -> xr.Dataset:
 
 def run(sample_days: int, chunk_spec: str) -> tuple[pd.DataFrame, dict[str, float | int | str]]:
     files = build_dataset_paths()
+    instant_nc = Path(files[0])
+    accum_nc = Path(files[1])
 
     print("Opening dataset with Dask...")
     start = time.perf_counter()
-    ds = xr.open_mfdataset(
-        files,
-        combine="by_coords",
-        parallel=False,
-        chunks="auto",
+
+    if chunk_spec.lower() == "auto":
+        chunks = {"valid_time": 96, "latitude": 80, "longitude": 80}
+    else:
+        chunk_hours = int(chunk_spec)
+        if chunk_hours <= 0:
+            raise ValueError("chunk-hours must be > 0, or use 'auto'.")
+        chunks = {"valid_time": chunk_hours, "latitude": 80, "longitude": 80}
+
+    ds_i = _open_chunked_dataset(instant_nc, chunks=chunks)
+    ds_a = _open_chunked_dataset(accum_nc, chunks=chunks)
+
+    ds = xr.merge(
+        [
+            ds_i[["t2m", "tcc"]],
+            ds_a[["ssr", "str", "tisr", "tsr", "ttr"]],
+        ],
         compat="override",
         combine_attrs="override",
     )
 
     ds = region_subset(ds)
     ds = apply_time_window(ds, sample_days)
-    if chunk_spec.lower() != "auto":
-        chunk_hours = int(chunk_spec)
-        if chunk_hours <= 0:
-            raise ValueError("chunk-hours must be > 0, or use 'auto'.")
-        ds = ds.chunk({"valid_time": chunk_hours})
 
     # Keep metrics aligned with the existing large Pandas analysis outputs.
     # Existing Pandas code uses latitude-weighted regional means.
@@ -163,9 +209,13 @@ def main() -> None:
     daily.round(4).to_csv(OUTPUT_DAILY_CSV, index=False)
     OUTPUT_SUMMARY_JSON.write_text(json.dumps(summary, indent=2), encoding="utf-8")
 
+    fig = figure_daily_t2m(daily)
+    utils.save_figure(fig, "dask_aligned_daily_t2m", formats=["pdf"])
+
     print("\nSaved outputs:")
     print(f"  - {OUTPUT_DAILY_CSV}")
     print(f"  - {OUTPUT_SUMMARY_JSON}")
+    print(f"  - {config.FIGURES_DIR / 'dask_aligned_daily_t2m.pdf'}")
 
 
 if __name__ == "__main__":

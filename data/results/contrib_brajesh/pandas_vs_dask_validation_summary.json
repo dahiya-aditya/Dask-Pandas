@@ -1,0 +1,15 @@
+{
+  "tolerances": {
+    "atol": 0.001,
+    "rtol": 0.001
+  },
+  "checks": 11,
+  "tables": [
+    "daily_regional_means"
+  ],
+  "all_passed": true,
+  "min_pass_rate": 1.0,
+  "max_abs_overall": 0.00010000000000331966,
+  "max_rel_overall": 9.5677299603673e-06,
+  "report_csv": "data\\results\\contrib_brajesh\\pandas_vs_dask_validation.csv"
+}

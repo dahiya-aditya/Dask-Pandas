@@ -1,147 +1,216 @@
-# Dask-Pandas
+# Dask-Pandas: Scalable Weather Data Processing with ERA5
 
-## Objective
-Investigate how Dask enables scalable data processing when in-memory Pandas becomes impractical, using ERA5 as a concrete high-resolution weather dataset.
+## Overview
 
-## Dataset
-ERA5 hourly data on single levels (Copernicus Climate Change Service / ECMWF).
+This project investigates scalable data processing strategies for large-volume gridded weather data using ERA5 (Copernicus Climate Change Service / ECMWF). We compare traditional in-memory Pandas workflows against Dask-based distributed processing, demonstrating when and how lazy evaluation and intelligent chunking enable analysis of datasets that exceed available RAM.
 
-Data source:
-https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels
+**Dataset:** ERA5 hourly single-level reanalysis data  
+**Region of focus:** South Asia (2024 calendar year)  
+**Data volumes:** 464 MB (subset), 12 GB (full year)
 
-Current request profiles used in this repository:
-```text
-Compact consistent-slice request (~464 MB)  -> baseline Pandas analysis
-Full 2024 request (~12 GB)                  -> large-volume processing and scalability testing
+## Quick Start
+
+### 1. Environment Setup
+
+Activate the Python virtual environment:
+```bash
+.venv\Scripts\Activate.ps1  # Windows PowerShell
+# or
+source .venv/bin/activate   # macOS/Linux
 ```
 
-## Workflow
-```text
-Step 01  Build baseline Pandas analyses on feasible subsets.
-Step 02  Run large-volume South Asia pipeline with Pandas baseline.
-Step 03  Implement aligned Dask pipeline with lazy loading and chunking.
-Step 04  Benchmark runtime and memory across chunk strategies.
-Step 05  Validate Pandas vs Dask consistency for daily metrics and anomalies.
+### 2. Verify Raw Data
+
+Check that required ERA5 payloads are extracted:
+```bash
+python -m core.housekeeping
 ```
+
+This verifies:
+- `data/raw/era5_consistent_slice_extracted/` (464 MB subset)
+- `data/raw/era5_large_overwhelm/` (12 GB full year)
+
+### 3. Run Full Workflow
+
+Execute all core and contributor analyses:
+```bash
+python .venv\Scripts\python.exe run_all_analyses.py
+```
+
+Optional: Include expensive benchmark
+```bash
+python .venv\Scripts\python.exe run_all_analyses.py --include-saachi-benchmark
+```
+
+Other flags:
+- `--clean`: Delete previous results before running
+- `--canonical-only`: Run only core analyses (skip contributor scripts)
 
 ## Repository Structure
-```text
+
+```
 Dask-Pandas/
-│
-├── core/
-│   ├── config.py
-│   ├── housekeeping.py
-│   └── utils.py
-│
-├── api_requests/
-│   ├── request_era5_consistent_slice_464mb.py
-│   └── request_era5_full_2024_12gb.py
+├── core/                              # Shared utilities and configuration
+│   ├── config.py                      # Dataset paths, regions, constants
+│   ├── housekeeping.py                # Setup and diagnostics
+│   └── utils.py                       # Figure saving, I/O helpers
 │
 ├── data/
-│   ├── raw/
+│   ├── raw/                           # ERA5 NetCDF payloads (git-ignored)
 │   │   ├── era5_consistent_slice_extracted/
 │   │   └── era5_large_overwhelm/
-│   ├── results/
+│   ├── results/                       # CSV outputs and summaries
 │   │   ├── central_india/
-│   │   │   ├── daily_metrics.csv
-│   │   │   └── summary.json
 │   │   ├── south_asia/
-│   │   │   ├── pandas_daily_metrics.csv
-│   │   │   ├── pandas_summary.json
-│   │   │   ├── dask_daily_metrics.csv
-│   │   │   └── dask_summary.json
-│   │   └── benchmark/
-│   │       ├── runtime_table.csv
-│   │       ├── consistency_daily.csv
-│   │       ├── consistency_anomaly.csv
-│   │       ├── chunk_sweep_table.csv
-│   │       └── summary.json
-│   └── figures/
+│   │   ├── benchmark/
+│   │   └── contrib_*/
+│   └── figures/                       # PDF and visualization outputs
 │
-├── central_india_464mb_analysis.py
-├── south_asia_2024_large_analysis.py
-├── south_asia_2024_dask_aligned.py
-├── dask_vs_pandas_benchmark.py
-├── south_asia_naive_load_demo.py
-└── analysis_using_dask.py
+├── Canonical Analyses (root level)
+│   ├── central_india_464mb_analysis.py
+│   ├── south_asia_2024_large_analysis.py
+│   ├── south_asia_2024_dask_aligned.py
+│   ├── south_asia_naive_load_demo.py
+│   └── dask_vs_pandas_benchmark.py
+│
+├── contrib_adwita/                    # Contributor analyses
+│   ├── temperature_cloudcover_dask_analysis.py
+│   ├── toposphere_radiation_dask_analysis.py
+│   └── surface_radiation_dask_analysis.py
+│
+├── contrib_brajesh/
+│   ├── south_asia_2024_dask_analysis.py
+│   ├── benchmark_dask_chunking.py
+│   ├── validate_pandas_vs_dask.py
+│   ├── dask_revision_experiment.py
+│   ├── plot_anomaly_graphs.py
+│   └── generate_case_study_report.py
+│
+├── contrib_saachi/
+│   └── temp_agg.py                    # Chunking strategy benchmark (slow)
+│
+├── run_all_analyses.py                # Orchestrator script
+├── report/                            # LaTeX writeup
+│   ├── report.tex
+│   ├── preamble.tex
+│   └── refs.bib
+└── README.md
 ```
 
-## Setup
-Run commands in any command-line interface from project root.
+## Workflow Description
 
-```text
-Required raw folders
-  data/raw/era5_consistent_slice_extracted/
-  data/raw/era5_large_overwhelm/
+### Core Analyses
+├── Core Analyses (root level)
 
-Verification
-  python -m core.housekeeping
+1. **central_india_464mb_analysis.py**
+   - Pandas-based baseline on 464 MB subset
+   - Spatial averaging and anomaly computation for Central India region
+   - Validates methodology before scaling to 12 GB
+
+2. **south_asia_2024_large_analysis.py**
+   - Pandas analysis on full 12 GB dataset
+   - Daily metrics, monthly climatology, temperature anomalies
+   - Output: baseline results for validation against Dask
+
+3. **south_asia_2024_dask_aligned.py**
+   - Equivalent Dask implementation with lazy loading
+   - Configurable chunking strategy (`--chunk-hours`)
+   - Runtime and memory comparison with Pandas
+
+4. **dask_vs_pandas_benchmark.py**
+   - Quantitative comparison: wall time, peak memory, task-graph complexity
+   - Optional chunk-size sweep (`--chunk-sweep`)
+   - Summary statistics and consistency tables
+
+5. **south_asia_naive_load_demo.py**
+   - Educational: demonstrates the cost of loading full 12 GB into RAM at once
+
+### Contributor Analyses
+
+**Adwita (Multi-variable analysis):**
+- `temperature_cloudcover_dask_analysis.py`: 2m temperature and cloud cover
+- `toposphere_radiation_dask_analysis.py`: Top-of-atmosphere radiation budget
+- `surface_radiation_dask_analysis.py`: Surface radiation fluxes
+
+**Brajesh (Validation and experiments):**
+- `south_asia_2024_dask_analysis.py`: Alternative Dask pipeline
+- `benchmark_dask_chunking.py`: Chunk-size sensitivity study
+- `validate_pandas_vs_dask.py`: Numeric consistency validation (MAE, RMSE)
+- `dask_revision_experiment.py`: Methodological variations
+- `plot_anomaly_graphs.py`: Publication-quality anomaly plots
+- `generate_case_study_report.md`: Structured summary report
+
+**Saachi (Benchmark experiment):**
+- `temp_agg.py`: Systematic comparison of three chunking strategies (time-first, balanced, space-first) on monthly aggregation task
+  - Note: Expensive (~15–40 min). Include only with `--include-saachi-benchmark` flag.
+
+## Individual Script Usage
+
+### Run a Single Analysis
+```bash
+python .venv\Scripts\python.exe south_asia_2024_large_analysis.py --recompute
 ```
 
-## Run Analyses
-```text
-Central India Pandas analysis
-  python central_india_464mb_analysis.py
-
-South Asia Pandas analysis (force NetCDF recompute)
-  python south_asia_2024_large_analysis.py --recompute
-
-South Asia Dask aligned analysis (full window)
-  python south_asia_2024_dask_aligned.py --sample-days 0 --chunk-hours auto
+### Dask Analysis with Custom Chunking
+```bash
+python .venv\Scripts\python.exe south_asia_2024_dask_aligned.py \
+  --sample-days 0 --chunk-hours 96
 ```
 
-## Run Benchmark
-Main full-window benchmark:
-```text
-python -u dask_vs_pandas_benchmark.py --sample-days 0 --chunk-hours 96 --skip-central
+### Benchmark with Chunk Sweep
+```bash
+python .venv\Scripts\python.exe dask_vs_pandas_benchmark.py \
+  --sample-days 0 --chunk-hours 96 \
+  --chunk-sweep "24,48,96,192,auto" --skip-central
 ```
 
-Full-window chunk sweep benchmark:
-```text
-python -u dask_vs_pandas_benchmark.py --sample-days 0 --chunk-hours 96 --chunk-sweep "24,48,96,192,auto" --skip-central
+### Run Saachi Benchmark
+```bash
+python .venv\Scripts\python.exe contrib_saachi/temp_agg.py
 ```
 
-## Project Report
-Detailed benchmarking results, consistency tables, methodological discussion,
-and assignment write-up are maintained in:
+## Report
 
-```text
-report/report.tex
-```
+The project write-up, methodological justification, and quantitative results are compiled in:
 
-Generated benchmark artifacts are stored under:
+**report/report.tex**
 
-```text
-data/results/benchmark/
-```
-
-### Compile the report
-From the report directory, run:
-
-```text
+To regenerate the PDF:
+```bash
+cd report
 pdflatex --shell-escape report.tex
-```
-
-To regenerate bibliography entries after edits to refs.bib:
-
-```text
 bibtex refs
 pdflatex --shell-escape report.tex
 pdflatex --shell-escape report.tex
 ```
 
-Do not modify:
 
-```text
-report/preamble.tex
-```
+## Dependencies
 
-Raw ERA5 payloads are intentionally ignored by Git due to size. Derived outputs, scripts, and figures remain versioned.
+Core requirements:
+- Python 3.10+
+- xarray, pandas, numpy
+- dask[complete] (distributed scheduler and diagnostics)
+- matplotlib
+- netCDF4
 
-## Team Members
-```text
-Aditya Dahiya      (dahiya-aditya)
-Adwita Joglekar    (adwita314)
-Saachi Sirola      (saachisirola)
-Brajesh K. Mahto   (Brajesh-k-Mahto)
-```
+See `.venv/` for pinned versions.
+
+## Data Management
+
+- **Raw ERA5 NetCDF files:** Git-ignored (size constraints). Must be downloaded via CDS API.
+- **Derived outputs:** Versioned in `data/results/` and `data/figures/`
+- **Intermediate artifacts:** Auto-generated by scripts; safe to delete and regenerate
+
+## Notes
+
+- Start with `run_all_analyses.py --canonical-only` to verify the core pipeline works (~10 min).
+- Contributor analyses can be run independently; see individual script headers for requirements.
+
+
+## Team
+
+- Aditya Dahiya
+- Adwita Joglekar
+- Saachi Sirola
+- Brajesh K. Mahto

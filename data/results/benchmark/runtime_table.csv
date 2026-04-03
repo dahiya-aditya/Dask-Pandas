@@ -1,3 +1,4 @@
 script,command,return_code,runtime_seconds,peak_rss_mb,stderr_tail
-south_asia_2024_large_analysis.py,C:\Users\Aditya\AppData\Local\Programs\Python\Python312\python.exe south_asia_2024_large_analysis.py,0,3.02,125.18,
-south_asia_2024_dask_aligned.py,C:\Users\Aditya\AppData\Local\Programs\Python\Python312\python.exe south_asia_2024_dask_aligned.py --sample-days 0 --chunk-hours auto,0,23.861,350.49,
+south_asia_2024_large_analysis.py,C:\Users\Aditya\Downloads\Dask-Pandas\.venv\Scripts\python.exe south_asia_2024_large_analysis.py --recompute,0,12.841,4.0,
+south_asia_2024_dask_aligned.py,C:\Users\Aditya\Downloads\Dask-Pandas\.venv\Scripts\python.exe south_asia_2024_dask_aligned.py --sample-days 0 --chunk-hours 96,0,42.5,4.0,"C:\Users\Aditya\Downloads\Dask-Pandas\south_asia_2024_dask_aligned.py:209: UserWarning: obj.round has no effect with datetime, timedelta, or period dtypes. Use obj.dt.round(...) instead.
+  daily.round(4).to_csv(OUTPUT_DAILY_CSV, index=False)"

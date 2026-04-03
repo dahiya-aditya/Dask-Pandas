@@ -48,6 +48,29 @@ ROOT_DIR = Path(".")
 RAW_DIR = Path("data/raw")
 RESULTS_DIR = Path("data/results")
 FIGURES_DIR = Path("data/figures")
+DOCS_DIR = Path("docs")
+
+RESULTS_CENTRAL_INDIA_DIR = RESULTS_DIR / "central_india"
+RESULTS_SOUTH_ASIA_DIR = RESULTS_DIR / "south_asia"
+RESULTS_BENCHMARK_DIR = RESULTS_DIR / "benchmark"
+
+RESULTS_CONTRIBUTOR_DIRS = {
+    "adwita": RESULTS_DIR / "contrib_adwita",
+    "brajesh": RESULTS_DIR / "contrib_brajesh",
+    "saachi": RESULTS_DIR / "contrib_saachi",
+}
+
+FIGURES_CONTRIBUTOR_DIRS = {
+    "adwita": FIGURES_DIR / "contrib_adwita",
+    "brajesh": FIGURES_DIR / "contrib_brajesh",
+    "saachi": FIGURES_DIR / "contrib_saachi",
+}
+
+DOCS_CONTRIBUTOR_DIRS = {
+    "adwita": DOCS_DIR / "contrib_adwita",
+    "brajesh": DOCS_DIR / "contrib_brajesh",
+    "saachi": DOCS_DIR / "contrib_saachi",
+}
 
 # ============================================================================
 # Analysis Region Definitions

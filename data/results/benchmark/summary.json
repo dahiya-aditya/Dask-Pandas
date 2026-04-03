@@ -1,24 +1,24 @@
 {
   "run_configuration": {
     "sample_days": 0,
-    "chunk_hours": "auto"
+    "chunk_hours": "96"
   },
   "scripts_ran": [
     {
       "script": "south_asia_2024_large_analysis.py",
-      "command": "C:\\Users\\Aditya\\AppData\\Local\\Programs\\Python\\Python312\\python.exe south_asia_2024_large_analysis.py",
+      "command": "C:\\Users\\Aditya\\Downloads\\Dask-Pandas\\.venv\\Scripts\\python.exe south_asia_2024_large_analysis.py --recompute",
       "return_code": 0,
-      "runtime_seconds": 3.02,
-      "peak_rss_mb": 125.18,
+      "runtime_seconds": 12.841,
+      "peak_rss_mb": 4.0,
       "stderr_tail": ""
     },
     {
       "script": "south_asia_2024_dask_aligned.py",
-      "command": "C:\\Users\\Aditya\\AppData\\Local\\Programs\\Python\\Python312\\python.exe south_asia_2024_dask_aligned.py --sample-days 0 --chunk-hours auto",
+      "command": "C:\\Users\\Aditya\\Downloads\\Dask-Pandas\\.venv\\Scripts\\python.exe south_asia_2024_dask_aligned.py --sample-days 0 --chunk-hours 96",
       "return_code": 0,
-      "runtime_seconds": 23.861,
-      "peak_rss_mb": 350.49,
-      "stderr_tail": ""
+      "runtime_seconds": 42.5,
+      "peak_rss_mb": 4.0,
+      "stderr_tail": "C:\\Users\\Aditya\\Downloads\\Dask-Pandas\\south_asia_2024_dask_aligned.py:209: UserWarning: obj.round has no effect with datetime, timedelta, or period dtypes. Use obj.dt.round(...) instead.\n  daily.round(4).to_csv(OUTPUT_DAILY_CSV, index=False)"
     }
   ],
   "all_scripts_success": true,

@@ -1,3 +1,0 @@
-script,command,return_code,runtime_seconds,peak_rss_mb,stderr_tail,chunk_spec,daily_t2m_mean_abs_diff,anom_t2m_mean_abs_diff
-south_asia_2024_dask_aligned.py [chunk=auto],C:\Users\Aditya\AppData\Local\Programs\Python\Python312\python.exe south_asia_2024_dask_aligned.py --sample-days 0 --chunk-hours auto,0,24.26,368.7,,auto,1.0928961748705477e-06,2.080028204214549e-06
-south_asia_2024_dask_aligned.py [chunk=1464],C:\Users\Aditya\AppData\Local\Programs\Python\Python312\python.exe south_asia_2024_dask_aligned.py --sample-days 0 --chunk-hours 1464,0,24.869,472.3,,1464,1.0928961748705477e-06,2.080028204214549e-06

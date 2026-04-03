@@ -9,9 +9,9 @@
   },
   "rows": 366,
   "sample_days": 0,
-  "chunk_spec": "1464",
-  "runtime_seconds": 22.86,
-  "mean_t2m_c": 22.490801463767898,
-  "max_t2m_c": 29.11198457977152,
-  "min_t2m_c": 13.262092719566882
+  "chunk_spec": "96",
+  "runtime_seconds": 39.884,
+  "mean_t2m_c": 22.490801463767717,
+  "max_t2m_c": 29.11198457977129,
+  "min_t2m_c": 13.262092719566777
 }

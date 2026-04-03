@@ -1,0 +1,33 @@
+{
+  "completion_pct": 100.0,
+  "completed_items": 11,
+  "total_items": 11,
+  "core_tasks": {
+    "ERA5 subset access": true,
+    "memory-stressing dataset config": true,
+    "baseline Pandas pipeline": true,
+    "equivalent Dask pipeline": true,
+    "temporal/spatial/anomaly analyses": true,
+    "Pandas vs Dask correctness validation": true
+  },
+  "additional_tasks": {
+    "chunk strategy experiments": true,
+    "unexpected Dask behavior discussion": true,
+    "developer effort and complexity comparison": true,
+    "poor initial Dask pipeline then revision": true,
+    "constraints-based interpretation (I/O/memory/parallelism)": true
+  },
+  "all_passed": true,
+  "best_profile": "balanced",
+  "worst_profile": "time_heavy",
+  "unexpected_behavior": "Tiny chunks were slower than larger chunks due to scheduler overhead and graph size.",
+  "poor_vs_revised_speedup": 2.078,
+  "evidence": {
+    "pandas_summary": "data\\results\\south_asia\\pandas_summary.json",
+    "dask_summary": "data\\results\\contrib_brajesh\\dask_large_summary.json",
+    "validation_summary": "data\\results\\contrib_brajesh\\pandas_vs_dask_validation_summary.json",
+    "chunk_benchmark": "data\\results\\contrib_brajesh\\dask_chunk_benchmark.csv",
+    "revision_experiment": "data\\results\\contrib_brajesh\\dask_revision_experiment.json",
+    "report_markdown": "docs\\contrib_brajesh\\dask_case_study_report.md"
+  }
+}

@@ -49,12 +49,12 @@ from core.utils import ensure_output_directories, save_figure
 
         
 # Output directory
-OUTPUT_DIR = config.RESULTS_CONTRIBUTOR_DIRS["saachi"] / "temporal_aggregation"
+OUTPUT_DIR = config.RESULTS_CONTRIBUTOR_DIRS["saachi"]
 
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 ensure_output_directories()
 
-config.FIGURES_DIR = config.FIGURES_CONTRIBUTOR_DIRS["saachi"] / "temporal_aggregation"
+config.FIGURES_DIR = config.FIGURES_CONTRIBUTOR_DIRS["saachi"]
 config.FIGURES_DIR.mkdir(parents=True, exist_ok=True)
 
 # NetCDF file paths from config

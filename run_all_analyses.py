@@ -106,7 +106,7 @@ def _expected(include_contrib: bool, include_saachi_benchmark: bool) -> list[Pat
         )
 
     if include_contrib and include_saachi_benchmark:
-        expected.append(ROOT / "data/figures/contrib_saachi/temporal_aggregation/chunking_benchmark.pdf")
+        expected.append(ROOT / "data/figures/contrib_saachi/chunking_benchmark.pdf")
 
     return expected
 

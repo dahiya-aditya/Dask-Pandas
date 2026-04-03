@@ -241,6 +241,9 @@ runtime under three chunking profiles used in contributor analyses.
 
 \begin{table}[h]
     \centering
+    \small
+    \setlength{\tabcolsep}{5pt}
+    \renewcommand{\arraystretch}{1.1}
     \caption{Spatial-averaging runtime by chunking profile}
     \begin{tabular}{llc}
         \hline
@@ -266,6 +269,83 @@ These runs reinforce the chunking trade-off:
     \item \verb|chunks=auto| gave the best practical balance in this environment,
     reducing both scheduler pressure and data-shuffling overhead.
 \end{itemize}
+
+\subsection{Temporal aggregation benchmark}
+We evaluated the impact of chunking strategies on temporal aggregation
+performance using a 12\,GB ERA5 dataset. The benchmark consists of a monthly
+aggregation pipeline executed under different chunking profiles. We record
+three key metrics: wall-clock time, peak RAM increase, and Dask task graph
+size.
+
+\begin{table}[h]
+    \centering
+    \small
+    \setlength{\tabcolsep}{4pt}
+    \renewcommand{\arraystretch}{1.1}
+    \caption{Monthly temporal aggregation benchmark across chunking profiles}
+    \begin{tabular}{p{0.44\textwidth}ccc}
+        \hline
+        Chunking profile & Wall time (s) & RAM increase (MB) & Dask tasks \\
+        \hline
+        \verb|valid_time=4| (Time-First) & 1338.9 & $\approx$ 0 & 14,077 \\
+        \verb|valid_time=120, latitude=30,|\\ \verb|longitude=30| (Balanced) & 668.2 & 400 & 258,188 \\
+        \verb|valid_time=-1, latitude=20,|\\ \verb|longitude=20| (Space-First) & 1507.0 & 47 & 44,422 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+The results show a clear trade-off between how small or large the tasks are,
+how much parallel processing can be used, and how much memory is required.
+
+\begin{itemize}
+    \item \textbf{Time-First chunking} uses small time slices that create a
+    smaller task graph, but the scheduler has to handle many tiny tasks and
+    runtime increases even though memory stays low.
+
+    \item \textbf{Balanced chunking} performs best, cutting runtime to about
+    half compared to Time-First chunking. Even though it creates a much larger
+    task graph, the bigger chunks make data access more efficient and reduce I/O,
+    so each worker can handle more data in a single task.
+
+    \item \textbf{Space-First chunking} performs worst for this task. Keeping
+    all time data in one chunk reduces parallelism and forces workers to load a
+    lot of data before doing any computation, which increases runtime and wastes
+    resources.
+\end{itemize}
+
+\subsection{Effect of Time-Axis Chunk Size}
+To isolate the role of time-axis chunking, we conducted a secondary experiment
+varying only the \verb|valid_time| chunk size while leaving spatial dimensions
+unchunked.
+
+\begin{table}[h]
+    \centering
+    \small
+    \setlength{\tabcolsep}{5pt}
+    \renewcommand{\arraystretch}{1.1}
+    \caption{Impact of time-axis chunk size on aggregation performance}
+    \begin{tabular}{p{0.36\textwidth}cc}
+        \hline
+        Chunk size & Wall time (s) & Dask tasks \\
+        \hline
+        \verb|valid_time=4|  & 1420 & 14,077 \\
+        \verb|valid_time=8|  & 730  & 9,037  \\
+        \verb|valid_time=16| & 390  & 9,037  \\
+        \hline
+    \end{tabular}
+\end{table}
+
+Increasing the time chunk size makes the code run much faster. Doubling the
+chunk size roughly cuts the runtime in half, showing that small chunks slow
+things down because of scheduler overhead. After a point, the number of tasks
+stops changing much, so further speedups mainly come from more efficient
+computation rather than fewer tasks.
+
+\subsection{Summary}
+Overall, these results show that the best chunking balances task size and
+memory use. Using moderately large chunks along the time axis gives the best
+performance, as it reduces scheduling overhead while still allowing good
+parallelism and reasonable memory usage.
 
 \section{Conclusion and Outlook}
 The assignment goals are largely satisfied: we built comparable Pandas and

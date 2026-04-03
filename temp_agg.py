@@ -22,7 +22,6 @@ Variables used (from the large dataset):
 """
 import time
 import os
-import sys
 import numpy as np
 import pandas as pd
 import xarray as xr
@@ -32,6 +31,8 @@ from pathlib import Path
 from dask.distributed import (Client,LocalCluster)
 import logging
 import traceback
+import math
+from core import config
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
@@ -39,12 +40,15 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 from core.config import LARGE_SOUTH_ASIA, MONTH_ABBR
 from core.utils import ensure_output_directories, save_figure
 
-
         
 # Output directory 
 OUTPUT_DIR = Path("data/results/temporal_aggregation")
+
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 ensure_output_directories()
+
+config.FIGURES_DIR = Path("data/figures/temporal_aggregation")
+config.FIGURES_DIR.mkdir(parents=True, exist_ok=True)
 
 # NetCDF file paths from config
 INSTANT_NC= LARGE_SOUTH_ASIA["data_dir"]/LARGE_SOUTH_ASIA["instant_file"]  # has t2m, tcc
@@ -89,9 +93,9 @@ chunking_strat = {
     },
 }
 chunk_size_exp = {
-    "time_4":{"valid_time": 4,  "latitude": -1, "longitude": -1},
-    "time_8":{"valid_time": 8,  "latitude": -1, "longitude": -1},
-    "time_16":{"valid_time": 16, "latitude": -1, "longitude": -1},
+    "time_4":{"chunks": {"valid_time": 4,  "latitude": -1, "longitude": -1}},
+    "time_8":{"chunks": {"valid_time": 8,  "latitude": -1, "longitude": -1}},
+    "time_16": {"chunks": {"valid_time": 16, "latitude": -1, "longitude": -1}},
 }
 
 #  HELPER FUNCTIONS
@@ -102,7 +106,7 @@ def get_ram_mb():
     return proc.memory_info().rss / 1_048_576   # bytes to MB
 
 
-def open_dataset_with_chunks(nc_path: str, chunks: dict) -> xr.Dataset:
+def open_dataset_with_chunks(nc_path, chunks):
     # opens a NetCDF file lazily - no data is actually loaded until .compute()
     # chunks dict tells Dask how to split the data, e.g. {"time": 4, "latitude": -1}
     # -1 means keep that whole dimension in one chunk
@@ -244,7 +248,7 @@ def plot_benchmark_comparison(metrics: list[dict]):
     ax.bar_label(bars, fmt="%.1fs", padding=4, fontsize=10, fontweight="bold")
     ax.set_title("Wall-Clock Time", fontsize=12, fontweight="bold")
     ax.set_ylabel("Seconds")
-    ax.set_ylim(0, max(wall_s) * 1.25)
+    ax.set_ylim(0, max(max(ram_delta), 1) * 1.25)
     ax.tick_params(axis="x", labelsize=9)
     ax.grid(axis="y", alpha=0.3)
 
@@ -270,7 +274,7 @@ def plot_benchmark_comparison(metrics: list[dict]):
 
     plt.tight_layout()
 
-    save_figure(fig, "chunking_benchmark", formats=["pdf", "png"])
+    save_figure(fig, "chunking_benchmark", formats=["png"])
     logging.info("benchmark chart saved")
 
 
@@ -278,7 +282,7 @@ def plot_monthly_climatology(best_df: pd.DataFrame, strategy_name: str):
 
     # Figure out which columns are actually present
     col_map = {}
-    for vname in VAR_META.keys:
+    for vname in VAR_META.keys():
         unit_suffix = VAR_META[vname][1].replace(" ", "").replace("⁻","").replace("²","2")
         renamed = f"{vname}_{unit_suffix}"
         if renamed in best_df.columns:
@@ -290,8 +294,7 @@ def plot_monthly_climatology(best_df: pd.DataFrame, strategy_name: str):
 
     n_vars = len(col_map)
     ncols  = 3
-    nrows  = (n_vars + ncols - 1) // ncols  # ceiling division
-
+    nrows = math.ceil(n_vars / ncols)
     fig, axes = plt.subplots(nrows, ncols, figsize=(5 * ncols, 4 * nrows))
     axes = axes.flatten()   # make indexing easy regardless of layout
 
@@ -323,11 +326,11 @@ def plot_monthly_climatology(best_df: pd.DataFrame, strategy_name: str):
         ax.grid(alpha=0.25)
 
     # Hide any unused subplot panels
-    for j in range(idx + 1, len(axes)):
+    for j in range(len(col_map), len(axes)):
         axes[j].set_visible(False)
 
     plt.tight_layout()
-    save_figure(fig, "monthly_climatology_all_vars", formats=["pdf", "png"])
+    save_figure(fig, "monthly_climatology_all_vars", formats=["png"])
     logging.info("climatology chart saved")
 
 
@@ -365,7 +368,7 @@ def plot_chunking_strategy_overlay(metrics: list[dict]):
     ax.grid(alpha=0.25)
 
     plt.tight_layout()
-    save_figure(fig, "t2m_strategy_overlay", formats=["pdf", "png"])
+    save_figure(fig, "t2m_strategy_overlay", formats=["png"])
     logging.info("overlay chart saved")
 
 
@@ -382,7 +385,7 @@ def plot_ram_timeline(metrics: list[dict]):
     after  = [m["ram_before_mb"] + m["ram_delta_mb"] for m in metrics]
 
     # Base bar (RAM before)
-    ax.barh(y_pos, before, color="gery", edgecolor="white", height=0.5, label="RAM before")
+    ax.barh(y_pos, before, color="grey", edgecolor="white", height=0.5, label="RAM before")
     # Extension (RAM increase)
     ax.barh(y_pos, [a - b for a, b in zip(after, before)],left=before, color=colours, edgecolor="white", height=0.5, label="RAM increase during compute")
 
@@ -396,7 +399,7 @@ def plot_ram_timeline(metrics: list[dict]):
     ax.grid(axis="x", alpha=0.25)
 
     plt.tight_layout()
-    save_figure(fig, "ram_usage_comparison", formats=["pdf", "png"])
+    save_figure(fig, "ram_usage_comparison", formats=["png"])
     logging.info("RAM chart saved")
 
 
@@ -461,11 +464,14 @@ def plot_dask_chunk_anatomy():
         # Description text box
         ax.text(0.5, -0.18, sv["desc"],transform=ax.transAxes, fontsize=8.5, ha="center", va="top",bbox=dict(boxstyle="round,pad=0.4", fc="white", ec=sv["colour"], alpha=0.8))
 
-        plt.tight_layout(rect=[0, 0.15, 1, 1])
-        save_figure(fig, "chunking_anatomy_diagram", formats=["pdf", "png"])
-        logging.info("chunking anatomy diagram saved")
+    plt.tight_layout(rect=[0, 0.15, 1, 1])
+    save_figure(fig, "chunking_anatomy_diagram", formats=["png"])
+    logging.info("chunking anatomy diagram saved")
 
 def plot_radiation_heatmap(best_df: pd.DataFrame):
+    print(best_df.columns.tolist())
+    print(best_df["month"].unique())
+    print(best_df[["month", "ssr_Wm2"]].head())
 
     rad_vars = ["ssr", "str", "tisr", "tsr", "ttr"]
     # Build matrix: rows = months, columns = variables
@@ -476,7 +482,8 @@ def plot_radiation_heatmap(best_df: pd.DataFrame):
             monthly = best_df.groupby("month")[col].mean().reindex(range(1, 13))
             # Normalise to [0, 1]
             mn, mx = monthly.min(), monthly.max()
-            data_cols[VAR_META[vname][0]] = (monthly - mn) / (mx - mn + 1e-9)
+            normalised = (monthly - mn) / (mx - mn + 1e-9)
+            data_cols[VAR_META[vname][0]] = normalised.values
 
     if len(data_cols) < 2:
         logging.warning("not enough radiation variables for heatmap - skipping")
@@ -485,7 +492,9 @@ def plot_radiation_heatmap(best_df: pd.DataFrame):
     mat = pd.DataFrame(data_cols, index=MONTH_ABBR)
 
     fig, ax = plt.subplots(figsize=(10, 5))
-    im = ax.imshow(mat.T.values, aspect="auto", cmap="YlOrRd", vmin=0, vmax=1)
+    print(mat)
+    print(mat.T.values)
+    im = ax.imshow(mat.T.values, aspect="auto", cmap="YlOrRd")
 
     ax.set_xticks(range(12))
     ax.set_xticklabels(MONTH_ABBR)
@@ -493,10 +502,10 @@ def plot_radiation_heatmap(best_df: pd.DataFrame):
     ax.set_yticklabels(mat.columns)
     ax.set_title("Normalised Monthly Mean: Radiation Variables\n(each row normalised to [0,1] independently)",fontsize=12, fontweight="bold")
 
-    plt.colorbar(im, ax=ax, label="Normalised intensity (0 = min, 1 = max)")
+    plt.colorbar(im, ax=ax, label="Normalised intensity")
     plt.tight_layout()
 
-    save_figure(fig, "radiation_heatmap", formats=["pdf", "png"])
+    save_figure(fig, "radiation_heatmap", formats=["png"])
     logging.info("radiation heatmap saved")
 
 
@@ -612,10 +621,10 @@ def main():
         times = [m["wall_s"] for m in size_metrics]
         
         fig, ax = plt.subplots()
-        plt.plot(names, times, marker='o')
-        plt.title("Effect of Chunk Size on Performance (Time-first)")
-        plt.ylabel("Execution Time (s)")
-        save_figure(fig, "chunk_size_comparison", formats=["pdf","png"])
+        ax.plot(names, times, marker='o')
+        ax.set_title("Effect of Chunk Size on Performance (Time-first)")
+        ax.set_ylabel("Execution Time (s)")
+        save_figure(fig, "chunk_size_comparison", formats=["png"])
 
         
     #closing
@@ -623,4 +632,5 @@ def main():
     logging.info("done outputs saved to: " + str(OUTPUT_DIR))
 
 if __name__ == "__main__":
-    main()
+    df = pd.read_csv("data/results/temporal_aggregation/balanced_monthly.csv")
+    plot_radiation_heatmap(df)

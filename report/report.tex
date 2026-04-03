@@ -290,9 +290,9 @@ size.
         \hline
         Chunking profile & Wall time (s) & RAM increase (MB) & Dask tasks \\
         \hline
-        \verb|valid_time=4| (Time-First) & 1338.9 & $\approx$ 0 & 14,077 \\
-        \verb|valid_time=120, latitude=30,|\\ \verb|longitude=30| (Balanced) & 668.2 & 400 & 258,188 \\
-        \verb|valid_time=-1, latitude=20,|\\ \verb|longitude=20| (Space-First) & 1507.0 & 47 & 44,422 \\
+        \verb|valid_time=120, latitude=30,|\\ \verb|longitude=30| (Balanced) & 1485.1 & 583 & 258,188 \\
+        \verb|valid_time=-1, latitude=20,|\\ \verb|longitude=20| (Space-First) & 2967.9 & $-500$ & 44,422 \\
+        \verb|valid_time=24| (Time-First) & 522.9 & 83 & 2,870 \\
         \hline
     \end{tabular}
 \end{table}
@@ -301,14 +301,13 @@ The results show a clear trade-off between how small or large the tasks are,
 how much parallel processing can be used, and how much memory is required.
 
 \begin{itemize}
-    \item \textbf{Time-First chunking} uses small time slices that create a
-    smaller task graph, but the scheduler has to handle many tiny tasks and
-    runtime increases even though memory stays low.
+    \item \textbf{Time-First chunking (valid\_time=24)} is fastest in this run.
+    It keeps scheduler overhead low while still exposing enough parallel work,
+    yielding the shortest wall-clock time and lowest task count.
 
-    \item \textbf{Balanced chunking} performs best, cutting runtime to about
-    half compared to Time-First chunking. Even though it creates a much larger
-    task graph, the bigger chunks make data access more efficient and reduce I/O,
-    so each worker can handle more data in a single task.
+    \item \textbf{Balanced chunking} is slower than Time-First here, despite
+    producing a very large task graph; the broader chunking across all axes
+    increases coordination overhead.
 
     \item \textbf{Space-First chunking} performs worst for this task. Keeping
     all time data in one chunk reduces parallelism and forces workers to load a
@@ -346,9 +345,8 @@ computation rather than fewer tasks.
 
 \subsubsection{Summary}
 Overall, these results show that the best chunking balances task size and
-memory use. Using moderately large chunks along the time axis gives the best
-performance, as it reduces scheduling overhead while still allowing good
-parallelism and reasonable memory usage.
+memory use. In this local run, Time-First with \verb|valid_time=24| gives the
+best temporal-aggregation performance, while Space-First remains the slowest.
 
 \section{Conclusion and Outlook}
 The assignment goals are largely satisfied: we built comparable Pandas and

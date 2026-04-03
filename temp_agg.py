@@ -93,9 +93,9 @@ chunking_strat = {
     },
 }
 chunk_size_exp = {
-    "time_4":{"chunks": {"valid_time": 4,  "latitude": -1, "longitude": -1}},
-    "time_8":{"chunks": {"valid_time": 8,  "latitude": -1, "longitude": -1}},
-    "time_16": {"chunks": {"valid_time": 16, "latitude": -1, "longitude": -1}},
+    "time_4":  {"chunks": {"valid_time": 4,  "latitude": -1, "longitude": -1}, "colour": "purple", "label": "time_4"},
+    "time_8":  {"chunks": {"valid_time": 8,  "latitude": -1, "longitude": -1}, "colour": "purple", "label": "time_8"},
+    "time_16": {"chunks": {"valid_time": 16, "latitude": -1, "longitude": -1}, "colour": "purple", "label": "time_16"},
 }
 
 #  HELPER FUNCTIONS
@@ -240,39 +240,37 @@ def plot_benchmark_comparison(metrics: list[dict]):
     n_tasks = [m["n_tasks"] for m in metrics]
 
     fig, axes = plt.subplots(1, 3, figsize=(15, 5))
-    fig.suptitle("Dask Chunking Strategy Benchmar: Large Dataset (12 GB)\n Monthly temporal aggregation: all 7 variables", fontsize=13, fontweight="bold")
+    fig.suptitle("Dask Chunking Strategy Benchmark: Large Dataset (12 GB)\n Monthly temporal aggregation: all 7 variables", fontsize=13, fontweight="bold")
 
-    # Panel 1: Wall time
+    # panel 1: wall time
     ax = axes[0]
-    bars = ax.bar(labels, wall_s, color=colours, edgecolor="white", linewidth=0.8)
-    ax.bar_label(bars, fmt="%.1fs", padding=4, fontsize=10, fontweight="bold")
-    ax.set_title("Wall-Clock Time", fontsize=12, fontweight="bold")
+    bars = ax.bar(labels, wall_s, color=colours, edgecolor="white")
+    ax.bar_label(bars, fmt="%.1fs", padding=4)
+    ax.set_title("Wall-Clock Time")
     ax.set_ylabel("Seconds")
-    ax.set_ylim(0, max(max(ram_delta), 1) * 1.25)
-    ax.tick_params(axis="x", labelsize=9)
+    ax.set_ylim(0, max(max(wall_s), 1) * 1.25)  # uses wall_s
     ax.grid(axis="y", alpha=0.3)
-
-    # Panel 2: RAM usage
+    
+    # panel 2: RAM usage
     ax = axes[1]
-    bars = ax.bar(labels, ram_delta, color=colours, edgecolor="white", linewidth=0.8)
-    ax.bar_label(bars, fmt="%.0f MB", padding=4, fontsize=10, fontweight="bold")
-    ax.set_title("Peak RAM Increase", fontsize=12, fontweight="bold")
+    bars = ax.bar(labels, ram_delta, color=colours, edgecolor="white")
+    ax.bar_label(bars, fmt="%.0f MB", padding=4)
+    ax.set_title("Peak RAM Increase")
     ax.set_ylabel("MB")
-    ax.set_ylim(0, max(ram_delta) * 1.25)
-    ax.tick_params(axis="x", labelsize=9)
+    ax.set_ylim(0, max(max(ram_delta), 1) * 1.25)  # uses ram_delta
     ax.grid(axis="y", alpha=0.3)
-
-    # Panel 3: Task graph size
+    
+    # panel 3: task count
     ax = axes[2]
-    bars = ax.bar(labels, n_tasks, color=colours, edgecolor="white", linewidth=0.8)
-    ax.bar_label(bars, fmt="%d", padding=4, fontsize=10, fontweight="bold")
-    ax.set_title("Dask Task Graph Size\n(lower = simpler graph)", fontsize=12, fontweight="bold")
+    bars = ax.bar(labels, n_tasks, color=colours, edgecolor="white")
+    ax.bar_label(bars, fmt="%d", padding=4)
+    ax.set_title("Dask Task Graph Size (lower = simpler)")
     ax.set_ylabel("Number of tasks")
-    ax.set_ylim(0, max(n_tasks) * 1.25)
-    ax.tick_params(axis="x", labelsize=9)
+    ax.set_ylim(0, max(max(n_tasks), 1) * 1.25)  # uses n_tasks
     ax.grid(axis="y", alpha=0.3)
 
     plt.tight_layout()
+    fig.subplots_adjust(bottom=0.2)
 
     save_figure(fig, "chunking_benchmark", formats=["png"])
     logging.info("benchmark chart saved")
@@ -385,20 +383,31 @@ def plot_ram_timeline(metrics: list[dict]):
     after  = [m["ram_before_mb"] + m["ram_delta_mb"] for m in metrics]
 
     # Base bar (RAM before)
-    ax.barh(y_pos, before, color="grey", edgecolor="white", height=0.5, label="RAM before")
+    ax.barh(y_pos, before, color="grey", edgecolor="white", height=0.5)
     # Extension (RAM increase)
-    ax.barh(y_pos, [a - b for a, b in zip(after, before)],left=before, color=colours, edgecolor="white", height=0.5, label="RAM increase during compute")
-
+    ax.barh(y_pos, [a - b for a, b in zip(after, before)],left=before, color=colours, edgecolor="white", height=0.5)
+    
+    x_max = max(max(after), max(before))
     for i, (b, a) in enumerate(zip(before, after)):
-        ax.text(a + 20, y_pos[i], f"{a:.0f} MB peak", va="center")
+        ax.text(x_max + 20, y_pos[i], f"{a:.0f} MB peak", va="center")
 
     ax.set_yticks(y_pos)
     ax.set_yticklabels(labels)
     ax.set_xlabel("RAM (MB)")
-    ax.legend(loc="lower right")
     ax.grid(axis="x", alpha=0.25)
 
+    from matplotlib.patches import Patch
+    legend_elements = [
+        Patch(facecolor="grey", label="RAM before"),
+        Patch(facecolor="blue", label="Time-First increase"),
+        Patch(facecolor="green", label="Balanced increase"),
+        Patch(facecolor="red", label="Space-First increase"),
+    ]
+    
+    ax.legend(handles=legend_elements, loc="lower right", bbox_to_anchor=(1, -0.4), ncol=2)
+    
     plt.tight_layout()
+    fig.subplots_adjust(bottom=0.2)
     save_figure(fig, "ram_usage_comparison", formats=["png"])
     logging.info("RAM chart saved")
 
@@ -469,10 +478,7 @@ def plot_dask_chunk_anatomy():
     logging.info("chunking anatomy diagram saved")
 
 def plot_radiation_heatmap(best_df: pd.DataFrame):
-    print(best_df.columns.tolist())
-    print(best_df["month"].unique())
-    print(best_df[["month", "ssr_Wm2"]].head())
-
+   
     rad_vars = ["ssr", "str", "tisr", "tsr", "ttr"]
     # Build matrix: rows = months, columns = variables
     data_cols = {}
@@ -492,8 +498,7 @@ def plot_radiation_heatmap(best_df: pd.DataFrame):
     mat = pd.DataFrame(data_cols, index=MONTH_ABBR)
 
     fig, ax = plt.subplots(figsize=(10, 5))
-    print(mat)
-    print(mat.T.values)
+    
     im = ax.imshow(mat.T.values, aspect="auto", cmap="YlOrRd")
 
     ax.set_xticks(range(12))
@@ -577,16 +582,16 @@ def main():
             traceback.print_exc()
             
     # secondary experiment - vary chunk size within time-first strategy
+
     size_metrics = []
-    for name, chunks in chunk_size_exp.items():
+    for name, strategy_cfg in chunk_size_exp.items():
         try:
-            result = benchmark_strategy(name,{"chunks": chunks, "colour": "#9C27B0", "label": name},vars_instant,vars_accum)
+            result = benchmark_strategy(name, strategy_cfg, vars_instant, vars_accum)
             size_metrics.append(result)
-            
         except Exception as e:
             logging.warning(f"chunk size experiment failed for {name}: {e}")
 
-        
+
     # save benchmark summary 
     summary_rows = []
     for m in all_metrics:
@@ -632,5 +637,4 @@ def main():
     logging.info("done outputs saved to: " + str(OUTPUT_DIR))
 
 if __name__ == "__main__":
-    df = pd.read_csv("data/results/temporal_aggregation/balanced_monthly.csv")
-    plot_radiation_heatmap(df)
+    main()

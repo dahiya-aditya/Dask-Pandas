@@ -12,6 +12,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import shutil
 import sys
 import zipfile
 from pathlib import Path
@@ -70,7 +71,9 @@ def extract_zip_to_directory(
                     print(f"    ✓ {output_path.name} (exists)")
             else:
                 with zf.open(member) as src, output_path.open("wb") as dst:
-                    dst.write(src.read())
+                    # Stream copy in chunks to avoid loading very large NetCDF
+                    # members fully into memory.
+                    shutil.copyfileobj(src, dst, length=16 * 1024 * 1024)
                 if verbose:
                     print(f"    ✓ {output_path.name}")
             extracted_paths.append(output_path)

@@ -41,11 +41,9 @@ LARGE_SOUTH_ASIA_REGION = REGIONS["south_asia"]
 DATA_DIR = LARGE_SOUTH_ASIA["data_dir"]
 INSTANT_NC = DATA_DIR / LARGE_SOUTH_ASIA["instant_file"]
 ACCUM_NC = DATA_DIR / LARGE_SOUTH_ASIA["accum_file"]
-DAILY_RESULTS_CSV = config.RESULTS_DIR / "daily_regional_means.csv"
-MONTHLY_RESULTS_CSV = config.RESULTS_DIR / "large_monthly_climatology.csv"
-ANOMALY_RESULTS_CSV = config.RESULTS_DIR / "large_temperature_anomalies.csv"
-HEAT_RESULTS_CSV = config.RESULTS_DIR / "heat_extreme_daily.csv"
-SUMMARY_JSON = config.RESULTS_DIR / "large_summary.json"
+SOUTH_ASIA_RESULTS_DIR = config.RESULTS_DIR / "south_asia"
+DAILY_RESULTS_CSV = SOUTH_ASIA_RESULTS_DIR / "pandas_daily_metrics.csv"
+SUMMARY_JSON = SOUTH_ASIA_RESULTS_DIR / "pandas_summary.json"
 
 
 # -- Load South Asia subset via netCDF4 + NumPy --------------------------------
@@ -235,18 +233,20 @@ def _read_time_indexed_csv(path) -> pd.DataFrame:
 
 
 def csv_cache_available() -> bool:
-    """Return True if the core CSV outputs needed for plotting already exist."""
-    return all(
-        path.exists()
-        for path in (DAILY_RESULTS_CSV, MONTHLY_RESULTS_CSV, ANOMALY_RESULTS_CSV, HEAT_RESULTS_CSV)
-    )
+    """Return True if consolidated daily CSV output exists."""
+    return DAILY_RESULTS_CSV.exists()
 
 
 def load_plot_inputs_from_csv() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    """Load daily, anomaly, and heat-extremes tables from saved CSV outputs."""
+    """Load daily table from CSV, then derive anomaly and heat-extremes tables."""
     daily = _read_time_indexed_csv(DAILY_RESULTS_CSV)
-    anomaly = _read_time_indexed_csv(ANOMALY_RESULTS_CSV)
-    heat_daily = _read_time_indexed_csv(HEAT_RESULTS_CSV)
+    anomaly = compute_anomalies(daily)
+    if "frac_above_35c" not in daily.columns or "frac_above_40c" not in daily.columns:
+        raise ValueError(
+            "Cached daily CSV is missing heat fraction columns needed for figures. "
+            "Re-run with --recompute to refresh outputs."
+        )
+    heat_daily = daily[["frac_above_35c", "frac_above_40c"]].copy()
     return daily, anomaly, heat_daily
 
 
@@ -308,11 +308,8 @@ def print_output_manifest() -> None:
     print("=" * 70)
     print("Output files saved:")
     print("=" * 70)
-    print("  CSV Results:")
+    print("  Consolidated Results:")
     print(f"    - {DAILY_RESULTS_CSV}")
-    print(f"    - {MONTHLY_RESULTS_CSV}")
-    print(f"    - {ANOMALY_RESULTS_CSV}")
-    print(f"    - {HEAT_RESULTS_CSV}")
     print("  Figures:")
     print(f"    - {config.FIGURES_DIR}/annual_temperature_cycle.pdf")
     print(f"    - {config.FIGURES_DIR}/monthly_energy_budget.pdf")
@@ -514,6 +511,7 @@ def figure_monthly_analysis(
 def main(recompute: bool = False) -> None:
     """Run complete South Asia large-scale analysis pipeline."""
     utils.ensure_output_directories()
+    SOUTH_ASIA_RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
     print("\n" + "=" * 70)
     print("South Asia 2024 Large-Scale Analysis")
@@ -550,15 +548,13 @@ def main(recompute: bool = False) -> None:
     # Compute statistics
     daily = compute_daily_stats(df_6h)
     anomaly = compute_anomalies(daily)
-
-    # Save results first (CSV-first workflow)
-    print("Saving results ...")
-    daily.round(4).to_csv(DAILY_RESULTS_CSV, index_label="time")
-    monthly_clim = compute_monthly_climatology(daily)
-    monthly_clim.round(4).to_csv(MONTHLY_RESULTS_CSV, index_label="month")
-    anomaly.round(4).to_csv(ANOMALY_RESULTS_CSV, index_label="time")
     heat_daily = df_ex.resample("D").max()
-    heat_daily.round(4).to_csv(HEAT_RESULTS_CSV, index_label="time")
+    daily = daily.join(heat_daily, how="left")
+
+    # Save consolidated results
+    print("Saving results ...")
+    SOUTH_ASIA_RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    daily.round(4).to_csv(DAILY_RESULTS_CSV, index_label="time")
 
     finalize_outputs(
         daily,

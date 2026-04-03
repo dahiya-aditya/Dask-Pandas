@@ -1,0 +1,70 @@
+{
+  "run_configuration": {
+    "sample_days": 0,
+    "chunk_hours": "auto"
+  },
+  "scripts_ran": [
+    {
+      "script": "south_asia_2024_large_analysis.py",
+      "command": "C:\\Users\\Aditya\\AppData\\Local\\Programs\\Python\\Python312\\python.exe south_asia_2024_large_analysis.py",
+      "return_code": 0,
+      "runtime_seconds": 3.02,
+      "peak_rss_mb": 125.18,
+      "stderr_tail": ""
+    },
+    {
+      "script": "south_asia_2024_dask_aligned.py",
+      "command": "C:\\Users\\Aditya\\AppData\\Local\\Programs\\Python\\Python312\\python.exe south_asia_2024_dask_aligned.py --sample-days 0 --chunk-hours auto",
+      "return_code": 0,
+      "runtime_seconds": 23.861,
+      "peak_rss_mb": 350.49,
+      "stderr_tail": ""
+    }
+  ],
+  "all_scripts_success": true,
+  "consistency": [
+    {
+      "metric": "t2m_c",
+      "rows_compared": 366,
+      "max_abs_diff": 0.00010000000000331966,
+      "mean_abs_diff": 1.0928961748705477e-06
+    },
+    {
+      "metric": "tcc",
+      "rows_compared": 366,
+      "max_abs_diff": 0.0,
+      "mean_abs_diff": 0.0
+    },
+    {
+      "metric": "ssr",
+      "rows_compared": 366,
+      "max_abs_diff": 0.00010000000000331966,
+      "mean_abs_diff": 3.0054644808770194e-06
+    },
+    {
+      "metric": "str_nlw",
+      "rows_compared": 366,
+      "max_abs_diff": 9.999999999976694e-05,
+      "mean_abs_diff": 8.196721311456307e-07
+    },
+    {
+      "metric": "net_rad",
+      "rows_compared": 366,
+      "max_abs_diff": 0.00010000000000331966,
+      "mean_abs_diff": 1.0928961748705477e-06
+    }
+  ],
+  "assignment_status": {
+    "large_dataset_dask_pipeline": "done",
+    "existing_scripts_benchmarked": "done",
+    "dask_vs_pandas_consistency_table": "done",
+    "runtime_table_generated": "done"
+  },
+  "outputs": {
+    "runtime_csv": "data\\results\\benchmark\\runtime_table.csv",
+    "consistency_csv": "data\\results\\benchmark\\consistency_daily.csv",
+    "anomaly_consistency_csv": "data\\results\\benchmark\\consistency_anomaly.csv",
+    "chunk_sweep_csv": "data\\results\\benchmark\\chunk_sweep_table.csv",
+    "summary_json": "data\\results\\benchmark\\summary.json"
+  }
+}

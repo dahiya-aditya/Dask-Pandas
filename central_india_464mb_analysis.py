@@ -25,6 +25,11 @@ from core import config, utils
 from core.config import CONSISTENT_SLICE, REGIONS
 
 
+CENTRAL_RESULTS_DIR = config.RESULTS_DIR / "central_india"
+CENTRAL_DAILY_CSV = CENTRAL_RESULTS_DIR / "daily_metrics.csv"
+CENTRAL_SUMMARY_JSON = CENTRAL_RESULTS_DIR / "summary.json"
+
+
 def load_consistent_region_dataframe(
     region: dict[str, float | int],
 ) -> tuple[pd.DataFrame, dict[str, int]]:
@@ -315,15 +320,13 @@ def run_analysis() -> dict:
         },
     }
 
-    # Save results
+    # Save consolidated results
     print("\nSaving results ...")
-    regional_time.to_csv(config.RESULTS_DIR / "regional_time_means.csv", index=False)
-    daily.to_csv(config.RESULTS_DIR / "daily_means.csv", index=False)
-    monthly.to_csv(config.RESULTS_DIR / "monthly_climatology.csv", index=False)
-    seasonal.to_csv(config.RESULTS_DIR / "seasonal_comparison.csv", index=False)
+    CENTRAL_RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    daily.to_csv(CENTRAL_DAILY_CSV, index=False)
 
     summary["figure_paths"] = plot_analysis_figures(monthly, seasonal, daily)
-    (config.RESULTS_DIR / "summary.json").write_text(
+    CENTRAL_SUMMARY_JSON.write_text(
         json.dumps(summary, indent=2), encoding="utf-8"
     )
 
@@ -333,22 +336,20 @@ def run_analysis() -> dict:
 def main() -> None:
     """Run complete analysis pipeline."""
     utils.ensure_output_directories()
+    CENTRAL_RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     summary = run_analysis()
 
     print("\n" + "=" * 70)
     print("Output files saved:")
     print("=" * 70)
     print(f"  CSV Results:")
-    print(f"    - {config.RESULTS_DIR}/regional_time_means.csv")
-    print(f"    - {config.RESULTS_DIR}/daily_means.csv")
-    print(f"    - {config.RESULTS_DIR}/monthly_climatology.csv")
-    print(f"    - {config.RESULTS_DIR}/seasonal_comparison.csv")
+    print(f"    - {CENTRAL_DAILY_CSV}")
     print(f"  Figures:")
     print(f"    - {config.FIGURES_DIR}/monthly_cycle.pdf")
     print(f"    - {config.FIGURES_DIR}/monsoon_comparison.pdf")
     print(f"    - {config.FIGURES_DIR}/first_year_timeseries.pdf")
     print(f"  Summary:")
-    print(f"    - {config.RESULTS_DIR}/summary.json")
+    print(f"    - {CENTRAL_SUMMARY_JSON}")
     print()
     print(f"Data summary:")
     print(f"  Rows processed: {summary['rows_processed']:,}")

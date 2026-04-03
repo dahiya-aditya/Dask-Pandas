@@ -1,0 +1,204 @@
+\input{preamble.tex}
+\usepackage{lmodern}
+
+% --------------------------------------------------------------------
+% --------------------------------------------------------------------
+% ---- ENTER YOUR PROJECT DETAILS BELOW
+
+% ---- title of the project
+\title{Scalable ERA5 Analysis with Pandas and Dask}
+
+% ---- names of team members
+\author{
+    \small Aditya Dahiya \and
+    \small Adwita Joglekar \and
+    \small Saachi Sirola \and
+    \small Brajesh K. Mahto
+    }
+
+% ---- enter the team number below
+\rhead{Team Number XX}
+
+% --------------------------------------------------------------------
+% --------------------------------------------------------------------
+
+
+% --------------------------------------------------------------------
+% --------------------------------------------------------------------
+% ---- DO NOT CHANGE THIS BLOCK OF CODE
+\begin{document}
+\maketitle
+% --------------------------------------------------------------------
+% --------------------------------------------------------------------
+
+
+
+% --------------------------------------------------------------------
+% --------------------------------------------------------------------
+% ---- WRITE YOUR REPORT BELOW
+
+\section{Introduction}
+This project evaluates when Dask improves practical scalability for weather
+reanalysis analysis compared to Pandas. We use ERA5 single-level data as a
+high-dimensional case study with multiple variables, hourly time steps, and
+spatial grids. The assignment objective is not only runtime comparison but also
+understanding memory behavior, chunking effects, correctness parity, and
+implementation trade-offs in real workflows.
+
+
+\section{Related Work}
+The project is grounded in established scientific-data workflows with NetCDF,
+array-based regional reductions, and temporal aggregation. Rather than
+introducing a novel algorithm, our contribution is an experience-driven
+evaluation of scalable data processing choices in a realistic ERA5 pipeline,
+including failure modes and revision steps.
+
+\section{Our contribution}
+We provide:
+\begin{enumerate}
+    \item A baseline Pandas workflow for a feasible subset and a larger South
+    Asia run.
+    \item An aligned Dask workflow that computes the same daily regional
+    metrics for parity testing.
+    \item A benchmark orchestrator that runs scripts end-to-end and exports
+    runtime, peak memory, chunk-sweep, and consistency artifacts.
+    \item A consolidated result layout in \verb|data/results/| split by
+    \verb|central_india/|, \verb|south_asia/|, and \verb|benchmark/|.
+\end{enumerate}
+
+\section{Methods}
+\subsection{Data}
+Two ERA5 request profiles were used:
+\begin{itemize}
+    \item Compact consistent-slice request ($\sim$464 MB) for baseline
+    Pandas analysis.
+    \item Full 2024 request ($\sim$12 GB) for large-volume analysis and Dask
+    scalability evaluation.
+\end{itemize}
+
+The analysis variables include near-surface temperature and radiation terms,
+with daily statistics and anomaly comparisons.
+
+\subsection{Analysis pipelines}
+\textbf{Pandas South Asia baseline.}
+The Pandas workflow computes regional daily metrics (temperature, cloud,
+radiation), derived quantities (net radiation), and anomalies from monthly
+means.
+
+\textbf{Dask aligned workflow.}
+The Dask workflow uses lazy loading and chunked execution, then computes the
+same daily metrics so that direct parity checks can be performed.
+
+\textbf{Benchmarking.}
+An orchestration script runs both workflows, records runtime and peak RSS
+memory, sweeps chunk settings, and exports consistency tables.
+
+\section{Results}
+\subsection{Runtime and memory}
+For the full-window South Asia benchmark:
+\begin{itemize}
+    \item Pandas recompute runtime: 13.04 s, peak RSS: 289.07 MB.
+    \item Dask aligned runtime (chunk=96): 37.69 s, peak RSS: 428.04 MB.
+\end{itemize}
+
+Chunk sweep results for Dask (full-window):
+\begin{itemize}
+    \item chunk=24: 39.93 s, 447.02 MB
+    \item chunk=48: 39.70 s, 438.93 MB
+    \item chunk=96: 40.30 s, 442.30 MB
+    \item chunk=192: 39.11 s, 439.80 MB
+    \item chunk=auto: 25.67 s, 370.12 MB
+\end{itemize}
+
+The \verb|auto| chunk strategy performed best in both runtime and memory in
+this environment.
+
+\subsection{Correctness and consistency}
+Daily parity over 366 rows showed very small differences:
+\begin{itemize}
+    \item \verb|t2m_c| mean abs diff: $1.09 \times 10^{-6}$
+    \item \verb|ssr| mean abs diff: $3.01 \times 10^{-6}$
+    \item \verb|str_nlw| mean abs diff: $8.20 \times 10^{-7}$
+    \item \verb|net_rad| mean abs diff: $1.09 \times 10^{-6}$
+    \item \verb|tcc| mean abs diff: 0.0
+\end{itemize}
+
+Anomaly parity is also strong, with mean absolute differences in the
+$10^{-6}$ range.
+
+\subsection{Unexpected behavior and revision}
+\textit{To be completed by teammate responsible for Dask workflow.}
+
+\subsection{Developer effort comparison}
+\textit{To be completed by teammate responsible for Dask workflow.}
+
+\section{Conclusion and Outlook}
+The assignment goals are largely satisfied: we built comparable Pandas and
+Dask pipelines, benchmarked runtime and memory under multiple chunk settings,
+and validated numerical consistency for both daily metrics and anomalies.
+
+Next steps include extending the Dask pipeline to additional global scenarios
+and refining narrative discussion of observed scalability limitations.
+
+\section{Acknowledgements}
+We thank the course team for providing the report template and project
+guidelines.
+
+\section{Author Contributions}
+
+\section{Code availability}
+The code for this project is available at the following GitHub repository:
+\url{https://github.com/dahiya-aditya/Dask-Pandas}.
+
+% --------------------------------------------------------------------
+% --------------------------------------------------------------------
+% ---- DO NOT CHANGE THIS BLOCK OF CODE
+\section{References}
+\bibliography{refs}
+% --------------------------------------------------------------------
+% --------------------------------------------------------------------
+
+
+\section{Appendix}
+
+\subsection{Additional figures}
+Additional figures can be exported to \verb|report/figs/| and added here in
+future revisions.
+
+\subsection{Algorithms}
+
+You can dump algorithms here as well.
+
+\begin{minipage}{0.7\textwidth}
+    \begin{algorithm}[H]
+        \caption{An algorithm with caption}\label{alg:cap}
+        \begin{algorithmic}
+        \Require $n \geq 0$
+        \Ensure $y = x^n$
+            \State $y \gets 1$
+            \State $X \gets x$
+            \State $N \gets n$
+            \While{$N \neq 0$}
+                \If{$N$ is even}
+                    \State $X \gets X \times X$
+                    \State $N \gets \frac{N}{2}$  \Comment{This is a comment}
+                \ElsIf{$N$ is odd}
+                    \State $y \gets y \times X$
+                    \State $N \gets N - 1$
+                \EndIf
+            \EndWhile
+        \end{algorithmic}
+    \end{algorithm}
+\end{minipage}
+
+
+\subsection{Code snippets}
+Code snippet showcase is intentionally omitted in this draft.
+
+
+% --------------------------------------------------------------------
+% --------------------------------------------------------------------
+% ---- DO NOT CHANGE THIS BLOCK OF CODE
+\end{document}
+% --------------------------------------------------------------------
+% --------------------------------------------------------------------

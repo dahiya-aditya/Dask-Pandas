@@ -1,4 +1,4 @@
 strategy,chunks,wall_s,ram_delta_mb,n_dask_tasks
-balanced,"{'valid_time': 120, 'latitude': 30, 'longitude': 30}",1485.1,583.0,258188
-space_first,"{'valid_time': -1, 'latitude': 20, 'longitude': 20}",2967.9,-500.0,44422
-time_first,"{'valid_time': 24, 'latitude': -1, 'longitude': -1}",522.9,83.0,2870
+balanced,"{'valid_time': 120, 'latitude': 30, 'longitude': 30}",1485.06,582.7,258188
+space_first,"{'valid_time': -1, 'latitude': 20, 'longitude': 20}",2967.91,-500.4,44422
+time_first,"{'valid_time': 24, 'latitude': -1, 'longitude': -1}",522.9,82.8,2870

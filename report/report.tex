@@ -290,15 +290,17 @@ size.
         \hline
         Chunking profile & Wall time (s) & RAM increase (MB) & Dask tasks \\
         \hline
-        \verb|valid_time=120, latitude=30,|\\ \verb|longitude=30| (Balanced) & 1485.1 & 583 & 258,188 \\
-        \verb|valid_time=-1, latitude=20,|\\ \verb|longitude=20| (Space-First) & 2967.9 & $-500$ & 44,422 \\
-        \verb|valid_time=24| (Time-First) & 522.9 & 83 & 2,870 \\
+        \verb|valid_time=120, latitude=30,|\\ \verb|longitude=30| (Balanced) & 1485.06 & 582.7 & 258,188 \\
+        \verb|valid_time=-1, latitude=20,|\\ \verb|longitude=20| (Space-First) & 2967.91 & $-500.4$ & 44,422 \\
+        \verb|valid_time=24| (Time-First) & 522.90 & 82.8 & 2,870 \\
         \hline
     \end{tabular}
 \end{table}
 
 The results show a clear trade-off between how small or large the tasks are,
-how much parallel processing can be used, and how much memory is required.
+    how much parallel processing can be used, and how much memory is required.
+    Here, RAM increase is reported as a net process-level delta; negative values
+    can occur when memory is released after compute.
 
 \begin{itemize}
     \item \textbf{Time-First chunking (valid\_time=24)} is fastest in this run.

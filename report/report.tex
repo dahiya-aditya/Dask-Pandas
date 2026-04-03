@@ -17,7 +17,7 @@
     }
 
 % ---- enter the team number below
-\rhead{Team Number XX}
+\rhead{Team Dask-Pandas}
 
 % --------------------------------------------------------------------
 % --------------------------------------------------------------------
@@ -30,6 +30,15 @@
 \maketitle
 % --------------------------------------------------------------------
 % --------------------------------------------------------------------
+
+\begin{abstract}
+This report presents a case study on scaling ERA5 weather analysis from an
+eager Pandas workflow to a chunked Dask workflow. We benchmark runtime and
+memory, validate numerical parity, and analyze practical trade-offs in
+chunking and execution strategy. Beyond performance, we include a focused
+anomaly analysis for South Asia in 2024 and summarize implementation effort,
+debugging complexity, and lessons for reproducible scientific data pipelines.
+\end{abstract}
 
 
 
@@ -79,6 +88,9 @@ Two ERA5 request profiles were used:
 The analysis variables include near-surface temperature and radiation terms,
 with daily statistics and anomaly comparisons.
 
+South Asia was analyzed over approximately $5^{\circ}\mathrm{N}$--$35^{\circ}\mathrm{N}$
+and $65^{\circ}\mathrm{E}$--$100^{\circ}\mathrm{E}$ with 6-hourly steps in 2024.
+
 \subsection{Analysis pipelines}
 \textbf{Pandas South Asia baseline.}
 The Pandas workflow computes regional daily metrics (temperature, cloud,
@@ -92,6 +104,13 @@ same daily metrics so that direct parity checks can be performed.
 \textbf{Benchmarking.}
 An orchestration script runs both workflows, records runtime and peak RSS
 memory, sweeps chunk settings, and exports consistency tables.
+
+\textbf{Anomaly definition.}
+For each variable $x$ and month $m$, daily anomalies are computed as
+\[
+\text{anom}_{d,m} = x_{d,m} - \overline{x}_{m},
+\]
+where $\overline{x}_{m}$ is the within-2024 monthly mean for that variable.
 
 \section{Results}
 \subsection{Runtime and memory}
@@ -112,6 +131,20 @@ Chunk sweep results for Dask (full-window):
 
 The \verb|auto| chunk strategy performed best in both runtime and memory in
 this environment.
+
+\begin{table}[h]
+    \centering
+    \caption{Full-window benchmark summary (South Asia 2024)}
+    \begin{tabular}{lcc}
+        \hline
+        Method & Runtime (s) & Peak RSS (MB) \\
+        \hline
+        Pandas baseline & 13.04 & 289.07 \\
+        Dask aligned (chunk=96) & 37.69 & 428.04 \\
+        Dask aligned (chunk=auto) & 25.67 & 370.12 \\
+        \hline
+    \end{tabular}
+\end{table}
 
 \subsection{Correctness and consistency}
 Daily parity over 366 rows showed very small differences:
@@ -172,10 +205,40 @@ In aggregate: Dask required $\sim 1.5\times$ lines of glue code, $\sim 2\times$
 debugging time, and $\sim 3\times$ total testing cycles compared to the
 Pandas baseline to achieve commensurate confidence in results.
 
+\subsection{Anomaly analysis (South Asia, 2024)}
+The anomaly series shows coherent sub-seasonal variability rather than random
+noise. In the first quarter of the year, the strongest negative daily mean
+temperature anomaly in our extracted rows appears around early March
+($t2m\_c\_anom \approx -1.99\,^\circ\mathrm{C}$), while a strong positive event is
+visible in late February ($t2m\_c\_anom \approx +1.46\,^\circ\mathrm{C}$).
+
+Across months, the signal is physically consistent with radiation-cloud
+interactions: positive cloud-cover anomalies often co-occur with reduced
+surface shortwave anomalies and moderated net-radiation anomalies. The anomaly
+metrics are within-year monthly anomalies, so they indicate deviations from the
+2024 monthly baseline and should not be interpreted as long-term climatological
+departure from a multi-decadal reference period.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.85\textwidth]{../data/figures/contrib_brajesh/anomaly_temperature_timeseries.pdf}
+    \caption{Daily temperature anomaly time series (South Asia, 2024).}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.85\textwidth]{../data/figures/contrib_brajesh/anomaly_relationships.pdf}
+    \caption{Relationships among anomaly variables (temperature, cloud, and radiation).}
+\end{figure}
+
 \section{Conclusion and Outlook}
 The assignment goals are largely satisfied: we built comparable Pandas and
 Dask pipelines, benchmarked runtime and memory under multiple chunk settings,
 and validated numerical consistency for both daily metrics and anomalies.
+
+Key practical finding: on this hardware and workload, a well-optimized Pandas
+pipeline can remain faster at this scale, while Dask provides safer scaling
+headroom and better control over memory pressure as workload size grows.
 
 Next steps include extending the Dask pipeline to additional global scenarios
 and refining narrative discussion of observed scalability limitations.
@@ -185,6 +248,10 @@ We thank the course team for providing the report template and project
 guidelines.
 
 \section{Author Contributions}
+All authors contributed to planning and implementation. Data acquisition,
+baseline analysis, Dask workflow development, benchmarking, validation, and
+report writing were completed collaboratively, with primary ownership divided
+across team members by module.
 
 \section{Code availability}
 The code for this project is available at the following GitHub repository:
@@ -202,34 +269,16 @@ The code for this project is available at the following GitHub repository:
 \section{Appendix}
 
 \subsection{Additional figures}
-Additional figures can be exported to \verb|report/figs/| and added here in
-future revisions.
+Additional outputs used during analysis include:
+\begin{itemize}
+    \item \verb|../data/figures/contrib_brajesh/anomaly_monthly_summary.pdf|
+    \item \verb|../data/figures/contrib_brajesh/dask_annual_temperature_cycle.pdf|
+    \item \verb|../data/figures/contrib_brajesh/dask_monthly_energy_budget.pdf|
+\end{itemize}
 
 \subsection{Algorithms}
-
-You can dump algorithms here as well.
-
-\begin{minipage}{0.7\textwidth}
-    \begin{algorithm}[H]
-        \caption{An algorithm with caption}\label{alg:cap}
-        \begin{algorithmic}
-        \Require $n \geq 0$
-        \Ensure $y = x^n$
-            \State $y \gets 1$
-            \State $X \gets x$
-            \State $N \gets n$
-            \While{$N \neq 0$}
-                \If{$N$ is even}
-                    \State $X \gets X \times X$
-                    \State $N \gets \frac{N}{2}$  \Comment{This is a comment}
-                \ElsIf{$N$ is odd}
-                    \State $y \gets y \times X$
-                    \State $N \gets N - 1$
-                \EndIf
-            \EndWhile
-        \end{algorithmic}
-    \end{algorithm}
-\end{minipage}
+The core reduction algorithm is implemented in code and validated by
+Pandas-vs-Dask parity checks (35/35 checks passed under configured tolerances).
 
 
 \subsection{Code snippets}
